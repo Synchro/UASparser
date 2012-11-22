@@ -5,7 +5,7 @@ A User Agent String parser for PHP
 
 [![Build Status](https://travis-ci.org/Synchro/UASparser.png)](https://travis-ci.org/Synchro/UASparser)
 
-This is a parser for the user agent strings presented by HTTP clients of various flavours. This code is based on the libraries available from http://user-agent-string.info
+This is a parser for the user agent strings presented by HTTP clients. This code is based on the libraries available from http://user-agent-string.info
 
 Licensed under the LGPL, see license.txt for details.
 
