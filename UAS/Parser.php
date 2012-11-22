@@ -12,7 +12,9 @@
  * @link       http://user-agent-string.info/download/UASparser
  */
 
-class UASparser
+namespace UAS;
+
+class Parser
 {
     /**
      * @var integer How often to update UAS database
@@ -248,10 +250,10 @@ class UASparser
 
             // should we reload the data because it is already old?
             if ($cacheIni['lastupdate'] < time() - $this->updateInterval || $cacheIni['lastupdatestatus'] != '0') {
-                $this->_downloadData();
+                $this->downloadData();
             }
         } else {
-            $this->_downloadData();
+            $this->downloadData();
         }
 
         // we have file with data, parse and return it
@@ -265,19 +267,20 @@ class UASparser
 
     /**
      * Download the data
+     * @return boolean
      */
-    private function _downloadData()
+    public function DownloadData()
     {
-        // support for at least on of the two is needed
+        // by default status is failed
+        $status = 1;
+        // support for one of curl or fopen wrappers is needed
         if (!ini_get('allow_url_fopen') && !function_exists('curl_init')) {
             trigger_error(
                 'ERROR: function file_get_contents not allowed URL open. Update the datafile (uasdata.ini in Cache Dir) manually.'
             );
-            return;
+            return $status;
         }
 
-        // by default status is failed
-        $status = 1;
         $cacheIni = array();
         if (file_exists($this->_cache_dir . '/cache.ini')) {
             $cacheIni = parse_ini_file($this->_cache_dir . '/cache.ini');
@@ -311,6 +314,8 @@ class UASparser
         $cacheIni .= 'lastupdate = "' . time() . "\"\n";
         $cacheIni .= "lastupdatestatus = \"$status\"\n";
         @file_put_contents($this->_cache_dir . '/cache.ini', $cacheIni);
+
+        return ($status == 0); //Return true on success
     }
 
     /**
@@ -341,8 +346,9 @@ class UASparser
     }
 
     /**
-     *  Set the cache directory
+     * Set the cache directory
      * @param string
+     * @return bool
      */
     public function SetCacheDir($cache_dir)
     {
@@ -355,11 +361,21 @@ class UASparser
         // perform some extra checks
         if (!is_writable($cache_dir) || !is_dir($cache_dir)) {
             trigger_error('ERROR: Cache dir(' . $cache_dir . ') is not a directory or not writable');
-            return;
+            return false;
         }
 
         // store the cache dir
         $cache_dir = realpath($cache_dir);
         $this->_cache_dir = $cache_dir;
+        return true;
+    }
+
+    /**
+     * Get the cache directory
+     * @return string
+     */
+    public function GetCacheDir()
+    {
+        return $this->_cache_dir;
     }
 }

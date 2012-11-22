@@ -9,35 +9,38 @@
  * @link http://user-agent-string.info/download/UASparser
  */
 
+namespace UAS;
+
+// Loads the class
+require 'UAS/Parser.php';
+
 // header page
 scriptheader();
 
-// Loads the class
-require 'UASparser.php';
-
 // Creates a new UASparser object and set cache dir (this php scrimt must right write to cache dir)
-$parser = new UASparser();
+$parser = new Parser();
 $parser->SetCacheDir(sys_get_temp_dir() . "/uascache/");
 
 // Gets information about the current browser's user agent
 $ret = $parser->Parse();
 // print response data - array view
-echo "----- <b>array view</b> -----<br />";
-echo "<b>Researched useragent:</b> Current<br />";
-echo '<pre>';
+$useragent = 'unknown';
+if (isset($_SERVER['HTTP_USER_AGENT'])) {
+    $useragent = $_SERVER['HTTP_USER_AGENT'];
+}
+echo "<h2>Array view</h2>";
+echo "<b>Researched current useragent: </b><pre>".htmlspecialchars($useragent)."</pre>";
+echo "<pre>";
 print_r($ret);
-echo '</pre>';
+echo "</pre>";
+echo "<h2>Formatted view</h2>";
 
-
-echo "----- <b>formatted view</b> -----<br />";
 // All icons are available on http://user-agent-string.info/download/ (all icons is 16x16px)
 $ico_ua_url = "http://user-agent-string.info/pub/img/ua/";
 $ico_os_url = "http://user-agent-string.info/pub/img/os/";
 
-// Gets information about user agent - example 1
-$ret = $parser->Parse();
 // print response data - formatted view
-echo "<b>Researched useragent:</b> Current<br />";
+echo "<b>Researched current useragent: </b><br />";
 echo $ret['typ'] . " - ";
 if ($ret['ua_url'] == "unknown") {
     $ua = $ret['ua_name'];
@@ -157,7 +160,7 @@ function scriptheader()
     <title>class UASparser.php example</title>
 </head>
 <body>
-<h1>class UASparser.php example</h1>
+<h1>UASparser example</h1>
 <hr/>
     <?php
 }
