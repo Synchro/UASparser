@@ -26,7 +26,7 @@ $useragent = 'unknown';
 if (isset($_SERVER['HTTP_USER_AGENT'])) {
     $useragent = $_SERVER['HTTP_USER_AGENT'];
 }
-$useragent = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.2; Preload_01_07; IEMB3; IEMB3)';
+//$useragent = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.2; Preload_01_07; IEMB3; IEMB3)';
 // Gets information about the current browser's user agent
 $ret = $parser->Parse($useragent);
 echo "<h2>Array view</h2>";
