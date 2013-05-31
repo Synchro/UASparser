@@ -3,4 +3,7 @@ php:
   - 5.5
   - 5.4
   - 5.3
+before_script:
+  - curl -fsq -o /dev/null http://user-agent-string.info/rpc/get_data.php\?key\=free\&format\=ini\&ver\=y || echo 'Could not contact user-agent-string.info'
+  - curl -i http://user-agent-string.info/rpc/get_data.php\?key\=free\&format\=ini\&ver\=y
 script: phpunit Tests

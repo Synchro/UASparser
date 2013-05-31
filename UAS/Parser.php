@@ -374,7 +374,7 @@ class Parser
         $data = '';
         // use fopen
         if (ini_get('allow_url_fopen')) {
-            $fp = fopen($url, 'rb', false, stream_context_create(array('http' => array('timeout' => $timeout))));
+            $fp = @fopen($url, 'rb', false, stream_context_create(array('http' => array('timeout' => $timeout))));
             if ($fp !== false) {
                 $data = stream_get_contents($fp);
                 fclose($fp);
