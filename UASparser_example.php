@@ -17,17 +17,18 @@ require 'UAS/Parser.php';
 // header page
 scriptheader();
 
-// Creates a new UASparser object and set cache dir (this php scrimt must right write to cache dir)
+// Creates a new UASparser object and set cache dir (this php script must right write to cache dir)
 $parser = new Parser();
 $parser->SetCacheDir(sys_get_temp_dir() . "/uascache/");
 
-// Gets information about the current browser's user agent
-$ret = $parser->Parse();
 // print response data - array view
 $useragent = 'unknown';
 if (isset($_SERVER['HTTP_USER_AGENT'])) {
     $useragent = $_SERVER['HTTP_USER_AGENT'];
 }
+$useragent = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.2; Preload_01_07; IEMB3; IEMB3)';
+// Gets information about the current browser's user agent
+$ret = $parser->Parse($useragent);
 echo "<h2>Array view</h2>";
 echo "<b>Researched current useragent: </b><pre>".htmlspecialchars($useragent)."</pre>";
 echo "<pre>";
