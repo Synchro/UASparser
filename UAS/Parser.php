@@ -321,28 +321,30 @@ class Parser
     /**
      * Get the content of a certain url with a defined timeout
      * @param string $url
-     * @param int|string $timeout
+     * @param int $timeout
      * @return string
      */
-    private function get_contents($url, $timeout = 5)
+    private function get_contents($url, $timeout = 30)
     {
+        $data = '';
         // use file_get_contents
         if (ini_get('allow_url_fopen')) {
-            $ctx = stream_context_create(array('http' => array('timeout' => $timeout)));
-            return file_get_contents($url, false, $ctx);
+            $data = @file_get_contents($url, false, stream_context_create(array('http' => array('timeout' => $timeout))));
         } // fall back to curl
         elseif (function_exists('curl_init')) {
             $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt_array($ch, array(
+                CURLOPT_TIMEOUT => $timeout,
+                CURLOPT_CONNECTTIMEOUT => $timeout,
+                CURLOPT_RETURNTRANSFER => true
+            ));
             $data = curl_exec($ch);
             curl_close($ch);
-            return $data;
         }
-
-        // no options left
-        return '';
+        if ($data === false) {
+            $data = '';
+        }
+        return $data;
     }
 
     /**
