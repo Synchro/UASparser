@@ -272,7 +272,7 @@ class Parser
     public function DownloadData()
     {
         // by default status is failed
-        $status = 1;
+        $status = false;
         // support for one of curl or fopen wrappers is needed
         if (!ini_get('allow_url_fopen') && !function_exists('curl_init')) {
             trigger_error(
@@ -286,24 +286,27 @@ class Parser
             $cacheIni = parse_ini_file($this->_cache_dir . '/cache.ini');
         }
 
-        // Get the version for the server
+        // Check the version on the server
+        // If we are current, don't download again
         $ver = $this->get_contents(self::$_ver_url);
-        if (strlen($ver) != 11) {
-            if (array_key_exists('localversion', $cacheIni) and $cacheIni['localversion']) {
-                $ver = $cacheIni['localversion'];
-            } else {
-                $ver = 'none';
+        if (preg_match('/^[0-9]{8}-[0-9]{2}$/', $ver)) { //Should be a date and version string like '20130529-01'
+            if (array_key_exists('localversion', $cacheIni)) {
+                if ($ver <= $cacheIni['localversion']) { //Version on server is same as or older than what we already have
+                    return true;
+                }
             }
+        } else {
+            $ver = 'none'; //Server gave us something unexpected
         }
 
         // Download the ini file
         if ($ini = $this->get_contents(self::$_ini_url)) {
-            // download the has file
+            // download the hash file
             $md5hash = $this->get_contents(self::$_md5_url);
             // validate the hash, if okay store the new ini file
             if (md5($ini) == $md5hash) {
-                @file_put_contents($this->_cache_dir . '/uasdata.ini', $ini);
-                $status = 0;
+                $written = @file_put_contents($this->_cache_dir . '/uasdata.ini', $ini, LOCK_EX);
+                $status = ($written !== false);
             }
         }
 
@@ -313,9 +316,9 @@ class Parser
         $cacheIni .= "localversion = \"$ver\"\n";
         $cacheIni .= 'lastupdate = "' . time() . "\"\n";
         $cacheIni .= "lastupdatestatus = \"$status\"\n";
-        @file_put_contents($this->_cache_dir . '/cache.ini', $cacheIni);
+        @file_put_contents($this->_cache_dir . '/cache.ini', $cacheIni, LOCK_EX);
 
-        return ($status == 0); //Return true on success
+        return $status; //Return true on success
     }
 
     /**

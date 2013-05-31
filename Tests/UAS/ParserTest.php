@@ -18,6 +18,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
     }
 
     public function testSetPath() {
+        echo 'Setting cache path to '.self::$cache_path."\n";
         $this->assertTrue(self::$uasparser->SetCacheDir(self::$cache_path));
     }
 
