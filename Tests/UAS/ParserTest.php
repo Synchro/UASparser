@@ -13,13 +13,18 @@ class ParserTest extends PHPUnit_Framework_TestCase
     protected static $cache_path;
 
     public function setUp() {
-        self::$uasparser = new UAS\Parser;
+        self::$uasparser = new UAS\Parser(null, null, true); //Create a UASParser instance with debug output enabled
         self::$cache_path = sys_get_temp_dir().'/uascache/';
     }
 
+    public static function tearDownAfterClass() {
+        self::$uasparser->ClearCache();
+    }
+
     public function testSetPath() {
-        echo 'Setting cache path to '.self::$cache_path."\n";
         $this->assertTrue(self::$uasparser->SetCacheDir(self::$cache_path));
+        $this->assertFalse(self::$uasparser->SetCacheDir('/var'));
+        $this->assertFalse(self::$uasparser->SetCacheDir('/jksdhfkjhsldkfhklkh/'.md5(microtime(true))));
     }
 
     public function testPath() {
@@ -34,7 +39,8 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
     public function testUpdateDatabase() {
         self::$uasparser->SetCacheDir(self::$cache_path);
-        $this->assertTrue(self::$uasparser->downloadData());
+        $this->assertTrue(self::$uasparser->DownloadData());
+        $this->assertTrue(self::$uasparser->DownloadData(true));
     }
 
     public function testCurrent() {

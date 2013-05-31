@@ -21,6 +21,11 @@ class Parser
      */
     public $updateInterval = 86400; // 1 day
 
+    /**
+     * @var boolean Whether debug output is enabled
+     */
+    protected $debug = false;
+
     private static $_ini_url = 'http://user-agent-string.info/rpc/get_data.php?key=free&format=ini';
     private static $_ver_url = 'http://user-agent-string.info/rpc/get_data.php?key=free&format=ini&ver=y';
     private static $_md5_url = 'http://user-agent-string.info/rpc/get_data.php?format=ini&md5=y';
@@ -32,15 +37,27 @@ class Parser
      * Constructor with an optional cache directory
      * @param string $cacheDirectory
      * @param integer $updateInterval
+     * @param bool $debug
      * @internal param \cache $string directory to be used by this instance
      */
-    public function __construct($cacheDirectory = null, $updateInterval = null)
+    public function __construct($cacheDirectory = null, $updateInterval = null, $debug = false)
     {
         if ($cacheDirectory) {
             $this->SetCacheDir($cacheDirectory);
         }
         if ($updateInterval) {
             $this->updateInterval = $updateInterval;
+        }
+        $this->debug = (boolean)$debug;
+    }
+
+    /**
+     * Output a time-stamped debug message if debugging is enabled
+     * @param string $msg
+     */
+    protected function debug($msg) {
+        if ($this->debug) {
+            echo gmdate('Y-m-d H:i:s') . "\t$msg\n";
         }
     }
 
@@ -242,6 +259,7 @@ class Parser
     private function _loadData()
     {
         if (!file_exists($this->_cache_dir)) {
+            $this->debug('Cache file not found');
             return false;
         }
 
@@ -260,21 +278,23 @@ class Parser
         if (file_exists($this->_cache_dir . '/uasdata.ini')) {
             return @parse_ini_file($this->_cache_dir . '/uasdata.ini', true);
         } else {
-            trigger_error('ERROR: No datafile (uasdata.ini in Cache Dir), maybe update the file manually.');
+            $this->debug('Data file not found');
         }
         return false;
     }
 
     /**
      * Download the data
+     * @param bool $force Whether to force a download even if we have a cached file
      * @return boolean
      */
-    public function DownloadData()
+    public function DownloadData($force = false)
     {
         // by default status is failed
         $status = false;
         // support for one of curl or fopen wrappers is needed
         if (!ini_get('allow_url_fopen') && !function_exists('curl_init')) {
+            $this->debug('Fopen wrappers and curl unavailable, cannot continue');
             trigger_error(
                 'ERROR: function file_get_contents not allowed URL open. Update the datafile (uasdata.ini in Cache Dir) manually.'
             );
@@ -292,22 +312,41 @@ class Parser
         if (preg_match('/^[0-9]{8}-[0-9]{2}$/', $ver)) { //Should be a date and version string like '20130529-01'
             if (array_key_exists('localversion', $cacheIni)) {
                 if ($ver <= $cacheIni['localversion']) { //Version on server is same as or older than what we already have
-                    return true;
+                    if ($force) {
+                        $this->debug('Existing file is current, but forcing a download anyway.');
+                    } else {
+                        $this->debug('Download skipped, existing file is current.');
+                        return true;
+                    }
                 }
             }
         } else {
+            $this->debug('Version string format mismatch.');
             $ver = 'none'; //Server gave us something unexpected
         }
 
         // Download the ini file
-        if ($ini = $this->get_contents(self::$_ini_url)) {
+        $ini = $this->get_contents(self::$_ini_url);
+        if (!empty($ini)) {
             // download the hash file
             $md5hash = $this->get_contents(self::$_md5_url);
-            // validate the hash, if okay store the new ini file
-            if (md5($ini) == $md5hash) {
-                $written = @file_put_contents($this->_cache_dir . '/uasdata.ini', $ini, LOCK_EX);
-                $status = ($written !== false);
-            }
+            if (!empty($md5hash)) {
+                // validate the hash, if okay store the new ini file
+                if (md5($ini) == $md5hash) {
+                    $written = @file_put_contents($this->_cache_dir . '/uasdata.ini', $ini, LOCK_EX);
+                    if ($written === false) {
+                        $this->debug('Failed to write data file to ' . $this->_cache_dir . '/uasdata.ini');
+                    } else {
+                        $status = true;
+                    }
+                } else {
+                    $this->debug('Data file hash mismatch.');
+                }
+              } else {
+                  $this->debug('Failed to fetch hash file.');
+              }
+        } else {
+            $this->debug('Failed to fetch data file.');
         }
 
         // build a new cache file and store it
@@ -316,7 +355,10 @@ class Parser
         $cacheIni .= "localversion = \"$ver\"\n";
         $cacheIni .= 'lastupdate = "' . time() . "\"\n";
         $cacheIni .= "lastupdatestatus = \"$status\"\n";
-        @file_put_contents($this->_cache_dir . '/cache.ini', $cacheIni, LOCK_EX);
+        $written = @file_put_contents($this->_cache_dir . '/cache.ini', $cacheIni, LOCK_EX);
+        if ($written === false) {
+            $this->debug('Failed to write cache file to ' . $this->_cache_dir . '/cache.ini');
+        }
 
         return $status; //Return true on success
     }
@@ -330,9 +372,28 @@ class Parser
     private function get_contents($url, $timeout = 30)
     {
         $data = '';
-        // use file_get_contents
+        // use fopen
         if (ini_get('allow_url_fopen')) {
-            $data = @file_get_contents($url, false, stream_context_create(array('http' => array('timeout' => $timeout))));
+            $fp = @fopen($url, 'rb', false, stream_context_create(array('http' => array('timeout' => $timeout))));
+            if ($fp !== false) {
+                $data = stream_get_contents($fp);
+                fclose($fp);
+            } else {
+                $this->debug('Opening URL failed: '.$url);
+            }
+            if (empty($data)) {
+                if ($this->debug) {
+                    $res = stream_get_meta_data($fp);
+                    if ($res['timed_out']) {
+                        $this->debug('Fetching URL failed due to timeout: '.$url);
+                    } else {
+                        $this->debug('Fetching URL failed: '.$url);
+                    }
+                }
+                $data = '';
+            } else {
+                $this->debug('Fetching URL succeeded: '.$url.' ');
+            }
         } // fall back to curl
         elseif (function_exists('curl_init')) {
             $ch = curl_init($url);
@@ -357,7 +418,7 @@ class Parser
      */
     public function SetCacheDir($cache_dir)
     {
-
+        $this->debug('Setting cache dir to '.$cache_dir);
         // The directory does not exist at this moment, try to make it
         if (!file_exists($cache_dir)) {
             @mkdir($cache_dir, 0777, true);
@@ -365,7 +426,7 @@ class Parser
 
         // perform some extra checks
         if (!is_writable($cache_dir) || !is_dir($cache_dir)) {
-            trigger_error('ERROR: Cache dir(' . $cache_dir . ') is not a directory or not writable');
+            $this->debug('Cache dir(' . $cache_dir . ') is not a directory or not writable');
             return false;
         }
 
@@ -382,5 +443,15 @@ class Parser
     public function GetCacheDir()
     {
         return $this->_cache_dir;
+    }
+
+    /**
+     * Clear the cache files
+     */
+    public function ClearCache()
+    {
+        @unlink($this->_cache_dir . '/cache.ini');
+        @unlink($this->_cache_dir . '/uasdata.ini');
+        $this->debug('Cleared cache.');
     }
 }
