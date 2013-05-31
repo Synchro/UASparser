@@ -7,6 +7,6 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y -qq curl
 before_script:
-  - curl -fsq -o /dev/null "http://user-agent-string.info/rpc/get_data.php?key=free&format=ini&ver=y" || echo 'Could not contact user-agent-string.info'
-  - curl -i "http://user-agent-string.info/rpc/get_data.php?key=free&format=ini&ver=y"
+  - time curl -fsq -o /dev/null "http://user-agent-string.info/rpc/get_data.php?key=free&format=ini&ver=y" || echo 'Could not contact user-agent-string.info'
+  - time curl -i "http://user-agent-string.info/rpc/get_data.php?key=free&format=ini&ver=y"
 script: phpunit Tests

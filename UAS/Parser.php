@@ -369,7 +369,7 @@ class Parser
      * @param int $timeout
      * @return string
      */
-    private function get_contents($url, $timeout = 30)
+    private function get_contents($url, $timeout = 60)
     {
         $data = '';
         // use fopen
