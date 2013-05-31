@@ -10,19 +10,20 @@ require 'UAS/Parser.php';
 class ParserTest extends PHPUnit_Framework_TestCase
 {
     protected static $uasparser;
+    protected static $cache_path;
 
     public function setUp() {
         self::$uasparser = new UAS\Parser;
+        self::$cache_path = sys_get_temp_dir().'/uascache/';
     }
 
     public function testSetPath() {
-        $this->assertTrue(self::$uasparser->SetCacheDir(sys_get_temp_dir().'/uascache/'));
+        $this->assertTrue(self::$uasparser->SetCacheDir(self::$cache_path));
     }
 
     public function testPath() {
-        $cd = sys_get_temp_dir().'/uascache/';
-        self::$uasparser->SetCacheDir($cd);
-        $this->assertEquals(self::$uasparser->GetCacheDir(), realpath($cd));
+        self::$uasparser->SetCacheDir(self::$cache_path);
+        $this->assertEquals(self::$uasparser->GetCacheDir(), realpath(self::$cache_path));
     }
 
     public function testExpires() {
@@ -31,12 +32,12 @@ class ParserTest extends PHPUnit_Framework_TestCase
     }
 
     public function testUpdateDatabase() {
-        self::$uasparser->SetCacheDir(sys_get_temp_dir().'/uascache/');
+        self::$uasparser->SetCacheDir(self::$cache_path);
         $this->assertTrue(self::$uasparser->downloadData());
     }
 
     public function testCurrent() {
-        self::$uasparser->SetCacheDir(sys_get_temp_dir().'/uascache/');
+        self::$uasparser->SetCacheDir(self::$cache_path);
         $u = self::$uasparser->Parse();
         $this->assertTrue(is_array($u));
         $this->assertArrayHasKey('typ', $u);
@@ -57,7 +58,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
     }
 
     public function testSafari() {
-        self::$uasparser->SetCacheDir(sys_get_temp_dir().'/uascache/');
+        self::$uasparser->SetCacheDir(self::$cache_path);
         $u = self::$uasparser->Parse('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/536.26.17 (KHTML, like Gecko) Version/6.0.2 Safari/536.26.17');
         $this->assertTrue(is_array($u));
         $this->assertEquals($u['typ'], 'Browser');

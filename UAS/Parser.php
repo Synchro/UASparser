@@ -64,13 +64,13 @@ class Parser
         $result['ua_company'] = 'unknown';
         $result['ua_company_url'] = 'unknown';
         $result['ua_icon'] = 'unknown.png';
-        $result["ua_info_url"] = 'unknown';
-        $result["os_family"] = 'unknown';
-        $result["os_name"] = 'unknown';
-        $result["os_url"] = 'unknown';
-        $result["os_company"] = 'unknown';
-        $result["os_company_url"] = 'unknown';
-        $result["os_icon"] = 'unknown.png';
+        $result['ua_info_url'] = 'unknown';
+        $result['os_family'] = 'unknown';
+        $result['os_name'] = 'unknown';
+        $result['os_url'] = 'unknown';
+        $result['os_company'] = 'unknown';
+        $result['os_company_url'] = 'unknown';
+        $result['os_icon'] = 'unknown.png';
 
         // if no user agent is supplied process the one from the server vars
         if (!isset($useragent) && isset($_SERVER['HTTP_USER_AGENT'])) {
@@ -289,7 +289,7 @@ class Parser
         // Get the version for the server
         $ver = $this->get_contents(self::$_ver_url);
         if (strlen($ver) != 11) {
-            if ($cacheIni['localversion']) {
+            if (array_key_exists('localversion', $cacheIni) and $cacheIni['localversion']) {
                 $ver = $cacheIni['localversion'];
             } else {
                 $ver = 'none';
