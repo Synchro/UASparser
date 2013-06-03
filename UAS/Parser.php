@@ -7,6 +7,7 @@
  * @copyright  Copyright (c) 2008 Jaroslav Mallat
  * @copyright  Copyright (c) 2010 Alex Stanev (http://stanev.org)
  * @copyright  Copyright (c) 2012 Martin van Wingerden (http://www.copernica.com)
+ * @author     Marcus Bointon (https://github.com/Synchro)
  * @version    0.51
  * @license    http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License
  * @link       http://user-agent-string.info/download/UASparser
@@ -25,6 +26,11 @@ class Parser
      * @var boolean Whether debug output is enabled
      */
     protected $debug = false;
+
+    /**
+     * @var integer $timeout Default timeout for network requests
+     */
+    public $timeout = 60;
 
     private static $_ini_url = 'http://user-agent-string.info/rpc/get_data.php?key=free&format=ini';
     private static $_ver_url = 'http://user-agent-string.info/rpc/get_data.php?key=free&format=ini&ver=y';
@@ -308,7 +314,7 @@ class Parser
 
         // Check the version on the server
         // If we are current, don't download again
-        $ver = $this->get_contents(self::$_ver_url);
+        $ver = $this->get_contents(self::$_ver_url, $this->timeout);
         if (preg_match('/^[0-9]{8}-[0-9]{2}$/', $ver)) { //Should be a date and version string like '20130529-01'
             if (array_key_exists('localversion', $cacheIni)) {
                 if ($ver <= $cacheIni['localversion']) { //Version on server is same as or older than what we already have
@@ -326,10 +332,10 @@ class Parser
         }
 
         // Download the ini file
-        $ini = $this->get_contents(self::$_ini_url);
+        $ini = $this->get_contents(self::$_ini_url, $this->timeout);
         if (!empty($ini)) {
             // download the hash file
-            $md5hash = $this->get_contents(self::$_md5_url);
+            $md5hash = $this->get_contents(self::$_md5_url, $this->timeout);
             if (!empty($md5hash)) {
                 // validate the hash, if okay store the new ini file
                 if (md5($ini) == $md5hash) {
@@ -365,11 +371,13 @@ class Parser
 
     /**
      * Get the content of a certain url with a defined timeout
+     * The timeout is set high (5 minutes) as the site can be slow to respond
+     * You shouldn't be doing this request interactively anyway!
      * @param string $url
      * @param int $timeout
      * @return string
      */
-    private function get_contents($url, $timeout = 60)
+    private function get_contents($url, $timeout = 300)
     {
         $data = '';
         // use fopen
@@ -378,21 +386,21 @@ class Parser
             if ($fp !== false) {
                 $data = stream_get_contents($fp);
                 fclose($fp);
+                if (empty($data)) {
+                    if ($this->debug) {
+                        $res = stream_get_meta_data($fp);
+                        if ($res['timed_out']) {
+                            $this->debug('Fetching URL failed due to timeout: '.$url);
+                        } else {
+                            $this->debug('Fetching URL failed: '.$url);
+                        }
+                    }
+                    $data = '';
+                } else {
+                  $this->debug('Fetching URL succeeded: '.$url.' ');
+                }
             } else {
                 $this->debug('Opening URL failed: '.$url);
-            }
-            if (empty($data)) {
-                if ($this->debug) {
-                    $res = stream_get_meta_data($fp);
-                    if ($res['timed_out']) {
-                        $this->debug('Fetching URL failed due to timeout: '.$url);
-                    } else {
-                        $this->debug('Fetching URL failed: '.$url);
-                    }
-                }
-                $data = '';
-            } else {
-                $this->debug('Fetching URL succeeded: '.$url.' ');
             }
         } // fall back to curl
         elseif (function_exists('curl_init')) {
@@ -403,10 +411,13 @@ class Parser
                 CURLOPT_RETURNTRANSFER => true
             ));
             $data = curl_exec($ch);
+            if ($data !== false and curl_errno($ch) == 0) {
+                $this->debug('Opening URL with curl succeeded: '.$url);
+            } else {
+                $this->debug('Opening URL with curl failed: '.$url.' '.curl_error($ch));
+                $data = '';
+            }
             curl_close($ch);
-        }
-        if ($data === false) {
-            $data = '';
         }
         return $data;
     }

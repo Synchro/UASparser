@@ -15,6 +15,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
     public function setUp() {
         self::$uasparser = new UAS\Parser(null, null, true); //Create a UASParser instance with debug output enabled
         self::$cache_path = sys_get_temp_dir().'/uascache/';
+        self::$uasparser->timeout = 600; //Be pessimistic, site can be very slow
     }
 
     public static function tearDownAfterClass() {
