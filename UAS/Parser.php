@@ -380,6 +380,7 @@ class Parser
     private function get_contents($url, $timeout = 300)
     {
         $data = '';
+        $starttime = microtime(true);
         // use fopen
         if (ini_get('allow_url_fopen')) {
             $fp = @fopen($url, 'rb', false, stream_context_create(array('http' => array('timeout' => $timeout))));
@@ -397,7 +398,7 @@ class Parser
                     }
                     $data = '';
                 } else {
-                  $this->debug('Fetching URL succeeded: '.$url.' ');
+                  $this->debug('Fetching URL with fopen succeeded: '.$url.'. '.strlen($data).' bytes in '.(microtime(true) - $starttime).' sec.');
                 }
             } else {
                 $this->debug('Opening URL failed: '.$url);
@@ -412,12 +413,14 @@ class Parser
             ));
             $data = curl_exec($ch);
             if ($data !== false and curl_errno($ch) == 0) {
-                $this->debug('Opening URL with curl succeeded: '.$url);
+                $this->debug('Fetching URL with curl succeeded: '.$url.'. '.strlen($data).' bytes in '.(microtime(true) - $starttime).' sec.');
             } else {
                 $this->debug('Opening URL with curl failed: '.$url.' '.curl_error($ch));
                 $data = '';
             }
             curl_close($ch);
+        } else {
+            trigger_error('Could not fetch UAS data; neither fopen nor curl are available.', E_USER_ERROR);
         }
         return $data;
     }
