@@ -8,7 +8,7 @@
  * @copyright  Copyright (c) 2010 Alex Stanev (http://stanev.org)
  * @copyright  Copyright (c) 2012 Martin van Wingerden (http://www.copernica.com)
  * @author     Marcus Bointon (https://github.com/Synchro)
- * @version    0.51
+ * @version    0.52
  * @license    http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License
  * @link       http://user-agent-string.info/download/UASparser
  */
@@ -61,7 +61,8 @@ class Parser
      * Output a time-stamped debug message if debugging is enabled
      * @param string $msg
      */
-    protected function debug($msg) {
+    protected function debug($msg)
+    {
         if ($this->debug) {
             echo gmdate('Y-m-d H:i:s') . "\t$msg\n";
         }
@@ -348,9 +349,9 @@ class Parser
                 } else {
                     $this->debug('Data file hash mismatch.');
                 }
-              } else {
-                  $this->debug('Failed to fetch hash file.');
-              }
+            } else {
+                $this->debug('Failed to fetch hash file.');
+            }
         } else {
             $this->debug('Failed to fetch data file.');
         }
@@ -383,53 +384,72 @@ class Parser
         $starttime = microtime(true);
         // use fopen
         if (ini_get('allow_url_fopen')) {
-            $fp = @fopen($url, 'rb', false, stream_context_create(array(
-                  'http' => array(
-                    'timeout' => $timeout,
-                    'header'  => "Accept-Encoding: gzip\r\n"
-                  ))));
+            $fp = @fopen(
+                $url,
+                'rb',
+                false,
+                stream_context_create(
+                    array(
+                        'http' => array(
+                            'timeout' => $timeout,
+                            'header' => "Accept-Encoding: gzip\r\n"
+                        )
+                    )
+                )
+            );
             if (is_resource($fp)) {
                 $data = stream_get_contents($fp);
                 $res = stream_get_meta_data($fp);
                 if (array_key_exists('wrapper_data', $res)) {
-                  foreach($res['wrapper_data'] as $d) {
-                    if ($d == 'Content-Encoding: gzip') { //Data was compressed
-                      $data = gzinflate(substr($data, 10, -8)); //Uncompress data
-                      $this->debug('Successfully uncompressed data');
-                      break;
+                    foreach ($res['wrapper_data'] as $d) {
+                        if ($d == 'Content-Encoding: gzip') { //Data was compressed
+                            $data = gzinflate(substr($data, 10, -8)); //Uncompress data
+                            $this->debug('Successfully uncompressed data');
+                            break;
+                        }
                     }
-                  }
                 }
                 fclose($fp);
                 if (empty($data)) {
                     if ($this->debug) {
                         if ($res['timed_out']) {
-                            $this->debug('Fetching URL failed due to timeout: '.$url);
+                            $this->debug('Fetching URL failed due to timeout: ' . $url);
                         } else {
-                            $this->debug('Fetching URL failed: '.$url);
+                            $this->debug('Fetching URL failed: ' . $url);
                         }
                     }
                     $data = '';
                 } else {
-                  $this->debug('Fetching URL with fopen succeeded: '.$url.'. '.strlen($data).' bytes in '.(microtime(true) - $starttime).' sec.');
+                    $this->debug(
+                        'Fetching URL with fopen succeeded: ' . $url . '. ' . strlen($data) . ' bytes in ' . (microtime(
+                                true
+                            ) - $starttime) . ' sec.'
+                    );
                 }
             } else {
-                $this->debug('Opening URL failed: '.$url);
+                $this->debug('Opening URL failed: ' . $url);
             }
         } // fall back to curl
         elseif (function_exists('curl_init')) {
             $ch = curl_init($url);
-            curl_setopt_array($ch, array(
-                CURLOPT_TIMEOUT => $timeout,
-                CURLOPT_CONNECTTIMEOUT => $timeout,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => 'gzip'
-            ));
+            curl_setopt_array(
+                $ch,
+                array(
+                    CURLOPT_TIMEOUT => $timeout,
+                    CURLOPT_CONNECTTIMEOUT => $timeout,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_ENCODING => 'gzip'
+                )
+            );
             $data = curl_exec($ch);
             if ($data !== false and curl_errno($ch) == 0) {
-                $this->debug('Fetching URL with curl succeeded: '.$url.'. '.strlen($data).' bytes in '.(microtime(true) - $starttime).' sec.');
+                $this->debug(
+                    'Fetching URL with curl succeeded: ' . $url . '. ' . strlen($data) . ' bytes in ' . (microtime(
+                            true
+                        ) - $starttime) . ' sec.'
+                );
             } else {
-                $this->debug('Opening URL with curl failed: '.$url.' '.curl_error($ch));
+                $this->debug('Opening URL with curl failed: ' . $url . ' ' . curl_error($ch));
                 $data = '';
             }
             curl_close($ch);
@@ -446,7 +466,7 @@ class Parser
      */
     public function SetCacheDir($cache_dir)
     {
-        $this->debug('Setting cache dir to '.$cache_dir);
+        $this->debug('Setting cache dir to ' . $cache_dir);
         // The directory does not exist at this moment, try to make it
         if (!file_exists($cache_dir)) {
             @mkdir($cache_dir, 0777, true);
