@@ -383,13 +383,26 @@ class Parser
         $starttime = microtime(true);
         // use fopen
         if (ini_get('allow_url_fopen')) {
-            $fp = @fopen($url, 'rb', false, stream_context_create(array('http' => array('timeout' => $timeout))));
-            if ($fp !== false) {
+            $fp = @fopen($url, 'rb', false, stream_context_create(array(
+                  'http' => array(
+                    'timeout' => $timeout,
+                    'header'  => "Accept-Encoding: gzip\r\n"
+                  ))));
+            if (is_resource($fp)) {
                 $data = stream_get_contents($fp);
+                $res = stream_get_meta_data($fp);
+                if (array_key_exists('wrapper_data', $res)) {
+                  foreach($res['wrapper_data'] as $d) {
+                    if ($d == 'Content-Encoding: gzip') { //Data was compressed
+                      $data = gzinflate(substr($data, 10, -8)); //Uncompress data
+                      $this->debug('Successfully uncompressed data');
+                      break;
+                    }
+                  }
+                }
                 fclose($fp);
                 if (empty($data)) {
                     if ($this->debug) {
-                        $res = stream_get_meta_data($fp);
                         if ($res['timed_out']) {
                             $this->debug('Fetching URL failed due to timeout: '.$url);
                         } else {
@@ -409,7 +422,8 @@ class Parser
             curl_setopt_array($ch, array(
                 CURLOPT_TIMEOUT => $timeout,
                 CURLOPT_CONNECTTIMEOUT => $timeout,
-                CURLOPT_RETURNTRANSFER => true
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => 'gzip'
             ));
             $data = curl_exec($ch);
             if ($data !== false and curl_errno($ch) == 0) {
