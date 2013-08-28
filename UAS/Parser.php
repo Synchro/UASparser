@@ -10,7 +10,7 @@
  * @copyright  Copyright (c) 2010 Alex Stanev (http://stanev.org)
  * @copyright  Copyright (c) 2012 Martin van Wingerden (http://www.copernica.com)
  * @author     Marcus Bointon (https://github.com/Synchro)
- * @version    0.52
+ * @version    0.53
  * @license    http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License
  * @link       http://user-agent-string.info/download/UASparser
  */
