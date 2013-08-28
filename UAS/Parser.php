@@ -32,7 +32,12 @@ class Parser
      */
     public $timeout = 60;
 
-    private static $_ini_url = 'http://user-agent-string.info/rpc/get_data.php?key=free&format=ini';
+	/**
+	 * @var bool $preventUpdate Prevent cache updates even if cache has expired
+	 */
+	protected $preventUpdate = false;
+
+	private static $_ini_url = 'http://user-agent-string.info/rpc/get_data.php?key=free&format=ini';
     private static $_ver_url = 'http://user-agent-string.info/rpc/get_data.php?key=free&format=ini&ver=y';
     private static $_md5_url = 'http://user-agent-string.info/rpc/get_data.php?format=ini&md5=y';
     private static $_info_url = 'http://user-agent-string.info';
@@ -43,10 +48,11 @@ class Parser
      * Constructor with an optional cache directory
      * @param string $cacheDirectory
      * @param integer $updateInterval
+     * @param bool $preventUpdate
      * @param bool $debug
      * @internal param \cache $string directory to be used by this instance
      */
-    public function __construct($cacheDirectory = null, $updateInterval = null, $debug = false)
+    public function __construct($cacheDirectory = null, $updateInterval = null, $preventUpdate = false, $debug = false)
     {
         if ($cacheDirectory) {
             $this->SetCacheDir($cacheDirectory);
@@ -54,6 +60,7 @@ class Parser
         if ($updateInterval) {
             $this->updateInterval = $updateInterval;
         }
+	    $this->preventUpdate = (boolean)$preventUpdate;
         $this->debug = (boolean)$debug;
     }
 
@@ -274,7 +281,7 @@ class Parser
             $cacheIni = parse_ini_file($this->_cache_dir . '/cache.ini');
 
             // should we reload the data because it is already old?
-            if ($cacheIni['lastupdate'] < time() - $this->updateInterval || $cacheIni['lastupdatestatus'] != '0') {
+            if (($cacheIni['lastupdate'] < time() - $this->updateInterval || $cacheIni['lastupdatestatus'] != '0') && !$this->preventUpdate) {
                 $this->downloadData();
             }
         } else {
