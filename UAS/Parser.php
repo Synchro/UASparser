@@ -274,7 +274,7 @@ class Parser
             $cacheIni = parse_ini_file($this->_cache_dir . '/cache.ini');
 
             // should we reload the data because it is already old?
-            if ($cacheIni['lastupdate'] < time() - $this->updateInterval || $cacheIni['lastupdatestatus'] != '0') {
+            if ($cacheIni['lastupdate'] < time() - $this->updateInterval || $cacheIni['lastupdatestatus'] != '1') {
                 $this->downloadData();
             }
         } else {
