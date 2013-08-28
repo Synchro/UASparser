@@ -19,18 +19,20 @@ class ParserTest extends PHPUnit_Framework_TestCase
     }
 
     public static function tearDownAfterClass() {
-        self::$uasparser->ClearCache();
+        //self::$uasparser->clearCache();
     }
 
     public function testSetPath() {
-        $this->assertTrue(self::$uasparser->SetCacheDir(self::$cache_path));
-        $this->assertFalse(self::$uasparser->SetCacheDir('/var'));
-        $this->assertFalse(self::$uasparser->SetCacheDir('/jksdhfkjhsldkfhklkh/'.md5(microtime(true))));
+        $this->assertTrue(self::$uasparser->setCacheDir(self::$cache_path));
+        //Test non-writable path
+        $this->assertFalse(self::$uasparser->setCacheDir('/var'));
+        //Test non-existent path
+        $this->assertFalse(self::$uasparser->setCacheDir('/jksdhfkjhsldkfhklkh/'.md5(microtime(true))));
     }
 
     public function testPath() {
-        self::$uasparser->SetCacheDir(self::$cache_path);
-        $this->assertEquals(self::$uasparser->GetCacheDir(), realpath(self::$cache_path));
+        self::$uasparser->setCacheDir(self::$cache_path);
+        $this->assertEquals(self::$uasparser->getCacheDir(), realpath(self::$cache_path));
     }
 
     public function testExpires() {
@@ -39,14 +41,31 @@ class ParserTest extends PHPUnit_Framework_TestCase
     }
 
     public function testUpdateDatabase() {
-        self::$uasparser->SetCacheDir(self::$cache_path);
-        $this->assertTrue(self::$uasparser->DownloadData());
-        $this->assertTrue(self::$uasparser->DownloadData(true));
+        self::$uasparser->setCacheDir(self::$cache_path);
+        $this->assertTrue(self::$uasparser->downloadData());
+        $this->assertTrue(self::$uasparser->downloadData(true));
+    }
+
+    public function testDownloadControl() {
+        self::$uasparser->setCacheDir(self::$cache_path);
+        self::$uasparser->setDoDownloads(false);
+        //Inject an old timestamp into the cache file
+        $cache = file_get_contents(self::$uasparser->getCacheDir().'/cache.ini');
+        $cache = preg_replace('/localversion = .*/', 'localversion = "20130529-01"', $cache, 1);
+        $cache = preg_replace('/lastupdate = .*/', 'lastupdate = "1346146206"', $cache, 1);
+        file_put_contents(self::$uasparser->getCacheDir().'/cache.ini', $cache);
+        unset($cache);
+        //Should use old data
+        $u = self::$uasparser->parse();
+        self::$uasparser->clearCache();
+        self::$uasparser->clearData();
+        //Should do a download even though downloads are disabled
+        $u = self::$uasparser->parse();
     }
 
     public function testCurrent() {
-        self::$uasparser->SetCacheDir(self::$cache_path);
-        $u = self::$uasparser->Parse();
+        self::$uasparser->setCacheDir(self::$cache_path);
+        $u = self::$uasparser->parse();
         $this->assertTrue(is_array($u));
         $this->assertArrayHasKey('typ', $u);
         $this->assertArrayHasKey('ua_family', $u);
@@ -66,8 +85,8 @@ class ParserTest extends PHPUnit_Framework_TestCase
     }
 
     public function testSafari() {
-        self::$uasparser->SetCacheDir(self::$cache_path);
-        $u = self::$uasparser->Parse('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/536.26.17 (KHTML, like Gecko) Version/6.0.2 Safari/536.26.17');
+        self::$uasparser->setCacheDir(self::$cache_path);
+        $u = self::$uasparser->parse('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/536.26.17 (KHTML, like Gecko) Version/6.0.2 Safari/536.26.17');
         $this->assertTrue(is_array($u));
         $this->assertEquals($u['typ'], 'Browser');
         $this->assertEquals($u['ua_family'], 'Safari');

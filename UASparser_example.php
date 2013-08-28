@@ -28,7 +28,7 @@ if (isset($_SERVER['HTTP_USER_AGENT'])) {
 }
 //$useragent = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.2; Preload_01_07; IEMB3; IEMB3)';
 // Gets information about the current browser's user agent
-$ret = $parser->Parse($useragent);
+$ret = $parser->parse($useragent);
 echo "<h2>Array view</h2>";
 echo "<b>Researched current useragent: </b><pre>".htmlspecialchars($useragent)."</pre>";
 echo "<pre>";
@@ -61,7 +61,7 @@ if ($ret['os_name'] != "unknown") {
 echo " --> <a href=\"" . $ret['ua_info_url'] . "\">UA info</a><br />";
 
 // Gets information about user agent - example 2
-$ret = $parser->Parse("libwww-perl/5.812");
+$ret = $parser->parse("libwww-perl/5.812");
 // print response data - formatted view
 echo "<br /><b>Researched useragent:</b> libwww-perl/5.812<br />";
 echo $ret['typ'] . " - ";
@@ -83,7 +83,7 @@ if ($ret['os_name'] != "unknown") {
 echo " --> <a href=\"" . $ret['ua_info_url'] . "\">UA info</a><br />";
 
 // Gets information about user agent - example 3
-$ret = $parser->Parse("Klondike/1.50 (HTTP Win32)");
+$ret = $parser->parse("Klondike/1.50 (HTTP Win32)");
 // print response data - formatted view
 echo "<br /><b>Researched useragent:</b> Klondike/1.50 (HTTP Win32)<br />";
 echo $ret['typ'] . " - ";
@@ -105,7 +105,7 @@ if ($ret['os_name'] != "unknown") {
 echo " --> <a href=\"" . $ret['ua_info_url'] . "\">UA info</a><br />";
 
 // Gets information about user agent - example 4
-$ret = $parser->Parse("Googlebot-Image/1.0");
+$ret = $parser->parse("Googlebot-Image/1.0");
 // print response data - formatted view
 echo "<br /><b>Researched useragent: </b>Googlebot-Image/1.0<br />";
 echo $ret['typ'] . " - ";
@@ -127,7 +127,7 @@ if ($ret['os_name'] != "unknown") {
 echo " --> <a href=\"" . $ret['ua_info_url'] . "\">UA info</a><br />";
 
 // Gets information about user agent - example 6
-$ret = $parser->Parse("W3C_Validator/1.654");
+$ret = $parser->parse("W3C_Validator/1.654");
 // print response data - formatted view
 echo "<br /><b>Researched useragent: </b>W3C_Validator/1.654<br />";
 echo $ret['typ'] . " - ";

@@ -1,5 +1,7 @@
 <?php
 /**
+ * User Agent String Parser
+ *
  * PHP version 5
  *
  * @package    UASparser
@@ -15,38 +17,81 @@
 
 namespace UAS;
 
+/**
+ * User Agent String Parser Class.
+ * @package UASparser
+ */
 class Parser
 {
     /**
-     * @var integer How often to update UAS database
+     * How often to update the UAS database.
+     * @type integer
      */
     public $updateInterval = 86400; // 1 day
 
     /**
-     * @var boolean Whether debug output is enabled
+     * Whether debug output is enabled.
+     * @type boolean
      */
     protected $debug = false;
 
     /**
-     * @var integer $timeout Default timeout for network requests
+     * Default timeout for network requests.
+     * @type integer
      */
     public $timeout = 60;
 
-    private static $_ini_url = 'http://user-agent-string.info/rpc/get_data.php?key=free&format=ini';
-    private static $_ver_url = 'http://user-agent-string.info/rpc/get_data.php?key=free&format=ini&ver=y';
-    private static $_md5_url = 'http://user-agent-string.info/rpc/get_data.php?format=ini&md5=y';
-    private static $_info_url = 'http://user-agent-string.info';
-    private $_cache_dir = null;
-    private $_data = null;
+    /**
+     * Should this instance attempt data downloads?
+     * Useful if some other instance (e.g. from cron) is responsible for downloads.
+     * @type bool
+     */
+    protected $doDownloads = true;
 
     /**
-     * Constructor with an optional cache directory
-     * @param string $cacheDirectory
-     * @param integer $updateInterval
-     * @param bool $debug
-     * @internal param \cache $string directory to be used by this instance
+     * URL to fetch the full data file from.
+     * @type string
      */
-    public function __construct($cacheDirectory = null, $updateInterval = null, $debug = false)
+    protected static $ini_url = 'http://user-agent-string.info/rpc/get_data.php?key=free&format=ini';
+
+    /**
+     * URL to fetch the data file version from.
+     * @type string
+     */
+    protected static $ver_url = 'http://user-agent-string.info/rpc/get_data.php?key=free&format=ini&ver=y';
+
+    /**
+     * URL to fetch the data file hash from.
+     * @type string
+     */
+    protected static $md5_url = 'http://user-agent-string.info/rpc/get_data.php?format=ini&md5=y';
+
+    /**
+     * URL for info about the UAS project.
+     * @type string
+     */
+    protected static $info_url = 'http://user-agent-string.info';
+
+    /**
+     * Path to store data file downloads to.
+     * @type string|null
+     */
+    protected $cache_dir = null;
+
+    /**
+     * Array of parsed UAS data.
+     * @type array|null
+     */
+    protected $data = null;
+
+    /**
+     * Constructor.
+     * @param string $cacheDirectory Cache directory for data downloads
+     * @param integer $updateInterval Allowed age of the cache file.
+     * @param bool $debug Whether to emit debug info.
+     * @param bool $doDownloads Whether to allow data downloads.
+     */
+    public function __construct($cacheDirectory = null, $updateInterval = null, $debug = false, $doDownloads = true)
     {
         if ($cacheDirectory) {
             $this->SetCacheDir($cacheDirectory);
@@ -55,6 +100,7 @@ class Parser
             $this->updateInterval = $updateInterval;
         }
         $this->debug = (boolean)$debug;
+        $this->doDownloads = (boolean)$doDownloads;
     }
 
     /**
@@ -69,17 +115,17 @@ class Parser
     }
 
     /**
-     * Parse the useragent string if given otherwise parse the current user agent
+     * Parse the useragent string if given, otherwise parse the current user agent.
      * @param string $useragent user agent string
      * @return array
      */
-    public function Parse($useragent = null)
+    public function parse($useragent = null)
     {
-        // intialize some variables
+        // Intialize some variables
         $browser_id = $os_id = null;
         $result = array();
 
-        // initialize the return value
+        // Initialize the return value
         $result['typ'] = 'unknown';
         $result['ua_family'] = 'unknown';
         $result['ua_name'] = 'unknown';
@@ -96,23 +142,23 @@ class Parser
         $result['os_company_url'] = 'unknown';
         $result['os_icon'] = 'unknown.png';
 
-        // if no user agent is supplied process the one from the server vars
+        // If no user agent is supplied process the one from the server vars
         if (!isset($useragent) && isset($_SERVER['HTTP_USER_AGENT'])) {
             $useragent = $_SERVER['HTTP_USER_AGENT'];
         }
 
-        // if we haven't loaded the data yet, do it now
-        if (!$this->_data) {
-            $this->_data = $this->_loadData();
+        // If we haven't loaded the data yet, do it now
+        if (!$this->data) {
+            $this->data = $this->loadData();
         }
 
-        // we have no data or no valid user agent, just return the default data
-        if (!$this->_data || !isset($useragent)) {
+        // We have no data or no valid user agent, just return the default data
+        if (!$this->data || !isset($useragent)) {
             return $result;
         }
 
-        // crawler
-        foreach ($this->_data['robots'] as $test) {
+        // Crawler
+        foreach ($this->data['robots'] as $test) {
             if ($test[0] == $useragent) {
                 $result['typ'] = 'Robot';
                 if ($test[1]) {
@@ -134,7 +180,7 @@ class Parser
                     $result['ua_icon'] = $test[6];
                 }
                 if ($test[7]) { // OS set
-                    $os_data = $this->_data['os'][$test[7]];
+                    $os_data = $this->data['os'][$test[7]];
                     if ($os_data[0]) {
                         $result['os_family'] = $os_data[0];
                     }
@@ -155,25 +201,25 @@ class Parser
                     }
                 }
                 if ($test[8]) {
-                    $result['ua_info_url'] = self::$_info_url . $test[8];
+                    $result['ua_info_url'] = self::$info_url . $test[8];
                 }
                 return $result;
             }
         }
 
-        // find a browser based on the regex
-        foreach ($this->_data['browser_reg'] as $test) {
+        // Find a browser based on the regex
+        foreach ($this->data['browser_reg'] as $test) {
             if (@preg_match($test[0], $useragent, $info)) { // $info may contain version
                 $browser_id = $test[1];
                 break;
             }
         }
 
-        // a valid browser was found
-        if ($browser_id) { // browser detail
-            $browser_data = $this->_data['browser'][$browser_id];
-            if ($this->_data['browser_type'][$browser_data[0]][0]) {
-                $result['typ'] = $this->_data['browser_type'][$browser_data[0]][0];
+        // A valid browser was found
+        if ($browser_id) { // Browser detail
+            $browser_data = $this->data['browser'][$browser_id];
+            if ($this->data['browser_type'][$browser_data[0]][0]) {
+                $result['typ'] = $this->data['browser_type'][$browser_data[0]][0];
             }
             if (isset($info[1])) {
                 $result['ua_version'] = $info[1];
@@ -197,14 +243,14 @@ class Parser
                 $result['ua_icon'] = $browser_data[5];
             }
             if ($browser_data[6]) {
-                $result['ua_info_url'] = self::$_info_url . $browser_data[6];
+                $result['ua_info_url'] = self::$info_url . $browser_data[6];
             }
         }
 
-        // browser OS, does this browser match contain a reference to an os?
-        if (isset($this->_data['browser_os'][$browser_id])) { // os detail
-            $os_id = $this->_data['browser_os'][$browser_id][0]; // Get the os id
-            $os_data = $this->_data['os'][$os_id];
+        // Browser OS, does this browser match contain a reference to an os?
+        if (isset($this->data['browser_os'][$browser_id])) { // OS detail
+            $os_id = $this->data['browser_os'][$browser_id][0]; // Get the OS id
+            $os_data = $this->data['os'][$os_id];
             if ($os_data[0]) {
                 $result['os_family'] = $os_data[0];
             }
@@ -226,17 +272,17 @@ class Parser
             return $result;
         }
 
-        // search for the os
-        foreach ($this->_data['os_reg'] as $test) {
+        // Search for the OS
+        foreach ($this->data['os_reg'] as $test) {
             if (@preg_match($test[0], $useragent)) {
                 $os_id = $test[1];
                 break;
             }
         }
 
-        // a valid os was found
-        if ($os_id) { // os detail
-            $os_data = $this->_data['os'][$os_id];
+        // A valid OS was found
+        if ($os_id) { // OS detail
+            $os_data = $this->data['os'][$os_id];
             if ($os_data[0]) {
                 $result['os_family'] = $os_data[0];
             }
@@ -260,30 +306,39 @@ class Parser
     }
 
     /**
-     * Load the data from the files
+     * Load agent data from the files.
+     * Will download data if we don't have any.
      * @return boolean
      */
-    private function _loadData()
+    protected function loadData()
     {
-        if (!file_exists($this->_cache_dir)) {
+        if (!file_exists($this->cache_dir)) {
             $this->debug('Cache file not found');
             return false;
         }
 
-        if (file_exists($this->_cache_dir . '/cache.ini')) {
-            $cacheIni = parse_ini_file($this->_cache_dir . '/cache.ini');
+        if (file_exists($this->cache_dir . '/cache.ini')) {
+            $cacheIni = parse_ini_file($this->cache_dir . '/cache.ini');
 
-            // should we reload the data because it is already old?
-            if ($cacheIni['lastupdate'] < time() - $this->updateInterval || $cacheIni['lastupdatestatus'] != '1') {
-                $this->downloadData();
+            // Should we fetch new data because it is too old?
+            if ($cacheIni['lastupdatestatus'] != '1' || $cacheIni['lastupdate'] < time() - $this->updateInterval) {
+                if ($this->doDownloads) {
+                    $this->downloadData();
+                } else {
+                    $this->debug('Downloads suppressed, using old data');
+                }
             }
         } else {
+            // Do a download even if downloads are disabled as otherwise we can't work at all
+            if (!$this->doDownloads) {
+                $this->debug('Data missing - Doing download even though downloads are suppressed');
+            }
             $this->downloadData();
         }
 
-        // we have file with data, parse and return it
-        if (file_exists($this->_cache_dir . '/uasdata.ini')) {
-            return @parse_ini_file($this->_cache_dir . '/uasdata.ini', true);
+        // We have file with data, parse and return it
+        if (file_exists($this->cache_dir . '/uasdata.ini')) {
+            return @parse_ini_file($this->cache_dir . '/uasdata.ini', true);
         } else {
             $this->debug('Data file not found');
         }
@@ -291,11 +346,11 @@ class Parser
     }
 
     /**
-     * Download the data
+     * Download new data.
      * @param bool $force Whether to force a download even if we have a cached file
      * @return boolean
      */
-    public function DownloadData($force = false)
+    public function downloadData($force = false)
     {
         // by default status is failed
         $status = false;
@@ -309,13 +364,13 @@ class Parser
         }
 
         $cacheIni = array();
-        if (file_exists($this->_cache_dir . '/cache.ini')) {
-            $cacheIni = parse_ini_file($this->_cache_dir . '/cache.ini');
+        if (file_exists($this->cache_dir . '/cache.ini')) {
+            $cacheIni = parse_ini_file($this->cache_dir . '/cache.ini');
         }
 
         // Check the version on the server
         // If we are current, don't download again
-        $ver = $this->get_contents(self::$_ver_url, $this->timeout);
+        $ver = $this->getContents(self::$ver_url, $this->timeout);
         if (preg_match('/^[0-9]{8}-[0-9]{2}$/', $ver)) { //Should be a date and version string like '20130529-01'
             if (array_key_exists('localversion', $cacheIni)) {
                 if ($ver <= $cacheIni['localversion']) { //Version on server is same as or older than what we already have
@@ -323,9 +378,9 @@ class Parser
                         $this->debug('Existing file is current, but forcing a download anyway.');
                     } else {
                         $this->debug('Download skipped, existing file is current.');
-	                    $status = true;
-	                    $this->write_cache_ini($ver, $status);
-	                    return $status;
+                        $status = true;
+                        $this->writeCacheIni($ver, $status);
+                        return $status;
                     }
                 }
             }
@@ -335,16 +390,16 @@ class Parser
         }
 
         // Download the ini file
-        $ini = $this->get_contents(self::$_ini_url, $this->timeout);
+        $ini = $this->getContents(self::$ini_url, $this->timeout);
         if (!empty($ini)) {
-            // download the hash file
-            $md5hash = $this->get_contents(self::$_md5_url, $this->timeout);
+            // Download the hash file
+            $md5hash = $this->getContents(self::$md5_url, $this->timeout);
             if (!empty($md5hash)) {
-                // validate the hash, if okay store the new ini file
+                // Validate the hash, if okay store the new ini file
                 if (md5($ini) == $md5hash) {
-                    $written = @file_put_contents($this->_cache_dir . '/uasdata.ini', $ini, LOCK_EX);
+                    $written = @file_put_contents($this->cache_dir . '/uasdata.ini', $ini, LOCK_EX);
                     if ($written === false) {
-                        $this->debug('Failed to write data file to ' . $this->_cache_dir . '/uasdata.ini');
+                        $this->debug('Failed to write data file to ' . $this->cache_dir . '/uasdata.ini');
                     } else {
                         $status = true;
                     }
@@ -357,43 +412,41 @@ class Parser
         } else {
             $this->debug('Failed to fetch data file.');
         }
-
-		$this->write_cache_ini($ver, $status);
-
+        $this->writeCacheIni($ver, $status);
         return $status; //Return true on success
     }
 
-	/**
-	 * Generate and write the cache.ini file in the cache directory
-	 * @param string $ver
-	 * @param string $status
-	 * @return bool
-	 */
-	private function write_cache_ini($ver, $status)
-	{
-		// build a new cache file and store it
-		$cacheIni = "; cache info for class UASparser - http://user-agent-string.info/download/UASparser\n";
-		$cacheIni .= "[main]\n";
-		$cacheIni .= "localversion = \"$ver\"\n";
-		$cacheIni .= 'lastupdate = "' . time() . "\"\n";
-		$cacheIni .= "lastupdatestatus = \"$status\"\n";
-		$written = @file_put_contents($this->_cache_dir . '/cache.ini', $cacheIni, LOCK_EX);
-		if ($written === false) {
-			$this->debug('Failed to write cache file to ' . $this->_cache_dir . '/cache.ini');
-			return false;
-		}
-		return true;
-	}
+    /**
+     * Generate and write the cache.ini file in the cache directory
+     * @param string $ver
+     * @param string $status
+     * @return bool
+     */
+    protected function writeCacheIni($ver, $status)
+    {
+        // Build a new cache file and store it
+        $cacheIni = "; cache info for class UASparser - http://user-agent-string.info/download/UASparser\n";
+        $cacheIni .= "[main]\n";
+        $cacheIni .= "localversion = \"$ver\"\n";
+        $cacheIni .= 'lastupdate = "' . time() . "\"\n";
+        $cacheIni .= "lastupdatestatus = \"$status\"\n";
+        $written = @file_put_contents($this->cache_dir . '/cache.ini', $cacheIni, LOCK_EX);
+        if ($written === false) {
+            $this->debug('Failed to write cache file to ' . $this->cache_dir . '/cache.ini');
+            return false;
+        }
+        return true;
+    }
 
     /**
-     * Get the content of a certain url with a defined timeout
+     * Get the contents of a URL with a defined timeout.
      * The timeout is set high (5 minutes) as the site can be slow to respond
      * You shouldn't be doing this request interactively anyway!
      * @param string $url
      * @param int $timeout
      * @return string
      */
-    private function get_contents($url, $timeout = 300)
+    protected function getContents($url, $timeout = 300)
     {
         $data = '';
         $starttime = microtime(true);
@@ -444,8 +497,8 @@ class Parser
             } else {
                 $this->debug('Opening URL failed: ' . $url);
             }
-        } // fall back to curl
-        elseif (function_exists('curl_init')) {
+        } elseif (function_exists('curl_init')) {
+            // Fall back to curl
             $ch = curl_init($url);
             curl_setopt_array(
                 $ch,
@@ -475,11 +528,11 @@ class Parser
     }
 
     /**
-     * Set the cache directory
+     * Set the cache directory.
      * @param string
      * @return bool
      */
-    public function SetCacheDir($cache_dir)
+    public function setCacheDir($cache_dir)
     {
         $this->debug('Setting cache dir to ' . $cache_dir);
         // The directory does not exist at this moment, try to make it
@@ -495,7 +548,7 @@ class Parser
 
         // store the cache dir
         $cache_dir = realpath($cache_dir);
-        $this->_cache_dir = $cache_dir;
+        $this->cache_dir = $cache_dir;
         return true;
     }
 
@@ -503,18 +556,44 @@ class Parser
      * Get the cache directory
      * @return string
      */
-    public function GetCacheDir()
+    public function getCacheDir()
     {
-        return $this->_cache_dir;
+        return $this->cache_dir;
     }
 
     /**
      * Clear the cache files
      */
-    public function ClearCache()
+    public function clearCache()
     {
-        @unlink($this->_cache_dir . '/cache.ini');
-        @unlink($this->_cache_dir . '/uasdata.ini');
+        @unlink($this->cache_dir . '/cache.ini');
+        @unlink($this->cache_dir . '/uasdata.ini');
         $this->debug('Cleared cache.');
+    }
+
+    /**
+     * Clear internal data store
+     */
+    public function clearData()
+    {
+        $this->data = null;
+        $this->debug('Cleared data.');
+    }
+
+    /**
+     * Get whether downloads are allowed.
+     * @return bool
+     */
+    public function getDoDownloads()
+    {
+        return $this->doDownloads;
+    }
+
+    /**
+     * Set whether downloads are allowed.
+     * @param $doDownloads
+     */
+    public function setDoDownloads($doDownloads) {
+        $this->doDownloads = (boolean)$doDownloads;
     }
 }

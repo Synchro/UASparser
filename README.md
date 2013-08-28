@@ -17,10 +17,11 @@ This version improved by [Marcus Bointon](https://github.com/Synchro):
 - Adds unit tests
 - Adds Travis config
 - Removes the view source option for security
-- Makes the DownloadData function public so it can be done on demand
+- Makes the downloadData function public so it can be done on demand
 - Uses the system temp dir for default cache location
 - Cleans up phpdocs
 - Reformats code in PSR-2 style
 - Fixes poor code in the example script
 - Improves error handling and debugging, adds variable timeouts
 - Adds support for gzip compression of database downloads
+- Adds PSR-0 autoload config

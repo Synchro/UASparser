@@ -19,9 +19,14 @@
 		}
 	],
 	"require": {
-		"php": ">=5.0.0"
+		"php": ">=5.3.0"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "*"
+	},
+	"autoload": {
+		"psr-0": {
+			"UAS": "UAS/"
+		}
 	}
 }
