@@ -274,7 +274,7 @@ class Parser
             $cacheIni = parse_ini_file($this->_cache_dir . '/cache.ini');
 
             // should we reload the data because it is already old?
-            if ($cacheIni['lastupdate'] < time() - $this->updateInterval || $cacheIni['lastupdatestatus'] != '0') {
+            if ($cacheIni['lastupdate'] < time() - $this->updateInterval || $cacheIni['lastupdatestatus'] != '1') {
                 $this->downloadData();
             }
         } else {
@@ -323,7 +323,9 @@ class Parser
                         $this->debug('Existing file is current, but forcing a download anyway.');
                     } else {
                         $this->debug('Download skipped, existing file is current.');
-                        return true;
+	                    $status = true;
+	                    $this->write_cache_ini($ver, $status);
+                        return $status;
                     }
                 }
             }
@@ -356,21 +358,34 @@ class Parser
             $this->debug('Failed to fetch data file.');
         }
 
-        // build a new cache file and store it
-        $cacheIni = "; cache info for class UASparser - http://user-agent-string.info/download/UASparser\n";
-        $cacheIni .= "[main]\n";
-        $cacheIni .= "localversion = \"$ver\"\n";
-        $cacheIni .= 'lastupdate = "' . time() . "\"\n";
-        $cacheIni .= "lastupdatestatus = \"$status\"\n";
-        $written = @file_put_contents($this->_cache_dir . '/cache.ini', $cacheIni, LOCK_EX);
-        if ($written === false) {
-            $this->debug('Failed to write cache file to ' . $this->_cache_dir . '/cache.ini');
-        }
+	    $this->write_cache_ini($ver, $status);
 
         return $status; //Return true on success
     }
 
-    /**
+	/**
+	 * Generate and write the cache.ini file in the cache directory
+	 * @param string $ver
+	 * @param string $status
+	 * @return bool
+	 */
+	private function write_cache_ini($ver, $status)
+	{
+		// build a new cache file and store it
+		$cacheIni = "; cache info for class UASparser - http://user-agent-string.info/download/UASparser\n";
+		$cacheIni .= "[main]\n";
+		$cacheIni .= "localversion = \"$ver\"\n";
+		$cacheIni .= 'lastupdate = "' . time() . "\"\n";
+		$cacheIni .= "lastupdatestatus = \"$status\"\n";
+		$written = @file_put_contents($this->_cache_dir . '/cache.ini', $cacheIni, LOCK_EX);
+		if ($written === false) {
+			$this->debug('Failed to write cache file to ' . $this->_cache_dir . '/cache.ini');
+			return false;
+		}
+		return true;
+	}
+
+	/**
      * Get the content of a certain url with a defined timeout
      * The timeout is set high (5 minutes) as the site can be slow to respond
      * You shouldn't be doing this request interactively anyway!
