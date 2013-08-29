@@ -1,2 +1,5 @@
 .idea/
 phpdoc/
+vendor
+composer.phar
+composer.lock

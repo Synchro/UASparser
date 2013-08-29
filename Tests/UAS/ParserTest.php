@@ -4,9 +4,6 @@
  * @author Marcus Bointon https://github.com/Synchro
  */
 
-require 'PHPUnit/Autoload.php';
-require 'UAS/Parser.php';
-
 class ParserTest extends PHPUnit_Framework_TestCase
 {
     protected static $uasparser;
