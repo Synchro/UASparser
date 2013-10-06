@@ -8,9 +8,9 @@
          convertErrorsToExceptions="true"
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
-         colors="false"
+         colors="true"
          forceCoversAnnotation="false"
-         strict="true"
+         strict="false"
          processIsolation="false">
     <testsuites>
         <testsuite name="UASParser tests">
