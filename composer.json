@@ -22,7 +22,8 @@
 		"php": ">=5.3.0"
 	},
 	"require-dev": {
-		"phpunit/phpunit": "*"
+		"phpunit/phpunit": "*",
+        "ext-xdebug": "*"
 	},
 	"autoload": {
 		"psr-0": {
