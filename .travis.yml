@@ -12,7 +12,7 @@ before_script:
   - cp phpunit.xml.dist Tests/phpunit.xml
 
 script:
-  - phpunit --configuration Tests/phpunit.xml --coverage-text
+  - phpunit --configuration Tests/phpunit.xml --coverage-text --colors --verbose
 
 notifications:
   email: false
