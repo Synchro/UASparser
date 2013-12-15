@@ -3,6 +3,9 @@ before_commands:
 
 tools:
     # Code Coverage
+    external_code_coverage: true
+
+
     php_code_coverage:
         enabled:              true
         test_command:         phpunit
