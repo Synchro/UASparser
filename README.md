@@ -24,6 +24,7 @@ Licensed under the LGPL, see license.txt for details.
 This version improved by [Marcus Bointon](https://github.com/Synchro):
 
 * [Maintained on GitHub](https://github.com/Synchro/UASparser)
+* [Published on packagist.org](https://packagist.org/packages/synchro/uasparser)
 * Creates a UAS namespace
 * Adds unit tests
 * Adds Travis config
