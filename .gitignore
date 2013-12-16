@@ -1,4 +1,5 @@
 .idea/
 phpdoc/
 vendor
+build/
 composer.phar

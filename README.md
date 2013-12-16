@@ -2,7 +2,17 @@
 
 **A User Agent String parser for PHP**
 
-Build Status: [![Build Status](https://travis-ci.org/Synchro/UASparser.png)](https://travis-ci.org/Synchro/UASparser)
+[![Build Status](https://travis-ci.org/Synchro/UASparser.png?branch=master)](https://travis-ci.org/Synchro/UASparser)
+[![Coverage Status](https://coveralls.io/repos/mimmi20/UASparser/badge.png?branch=master)](https://coveralls.io/r/mimmi20/UASparser?branch=master)
+[![Dependency Status](https://www.versioneye.com/php/Synchro:UASparser/dev-master/badge.png)](https://www.versioneye.com/php/Synchro:UASparser/dev-master)
+
+[![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/mimmi20/UASparser/badges/quality-score.png?s=77c4592dc25aeeae96806ed5a28e4b8a239668c8)](https://scrutinizer-ci.com/g/mimmi20/UASparser/) 
+[![Code Coverage](https://scrutinizer-ci.com/g/mimmi20/UASparser/badges/coverage.png?s=3040011cfecbbc3d940ae0f7ed5551669a4ac21f)](https://scrutinizer-ci.com/g/mimmi20/UASparser/)
+
+[![Latest Stable Version](https://poser.pugx.org/Synchro/UASparser/v/stable.png)](https://packagist.org/packages/Synchro/UASparser)
+[![Latest Unstable Version](https://poser.pugx.org/Synchro/UASparser/v/unstable.png)](https://packagist.org/packages/Synchro/UASparser)
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/Synchro/uasparser/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
 This is a parser and classifier for user agent strings presented by HTTP clients.
 
