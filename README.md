@@ -3,7 +3,7 @@
 **A User Agent String parser for PHP**
 
 [![Build Status](https://travis-ci.org/Synchro/UASparser.png?branch=master)](https://travis-ci.org/Synchro/UASparser)
-[![Coverage Status](https://coveralls.io/repos/mimmi20/UASparser/badge.png?branch=master)](https://coveralls.io/r/mimmi20/UASparser?branch=master)
+[![Coverage Status](https://coveralls.io/repos/Synchro/UASparser/badge.png?branch=master)](https://coveralls.io/r/Synchro/UASparser?branch=master)
 [![Dependency Status](https://www.versioneye.com/php/Synchro:UASparser/dev-master/badge.png)](https://www.versioneye.com/php/Synchro:UASparser/dev-master)
 [![Depending Status](http://depending.in/Synchro/UASparser.png)](http://depending.in/Synchro/UASparser)
 
