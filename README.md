@@ -5,6 +5,7 @@
 [![Build Status](https://travis-ci.org/Synchro/UASparser.png?branch=master)](https://travis-ci.org/Synchro/UASparser)
 [![Coverage Status](https://coveralls.io/repos/mimmi20/UASparser/badge.png?branch=master)](https://coveralls.io/r/mimmi20/UASparser?branch=master)
 [![Dependency Status](https://www.versioneye.com/php/Synchro:UASparser/dev-master/badge.png)](https://www.versioneye.com/php/Synchro:UASparser/dev-master)
+[![Depending Status](http://depending.in/Synchro/UASparser.png)](http://depending.in/Synchro/UASparser)
 
 [![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/mimmi20/UASparser/badges/quality-score.png?s=77c4592dc25aeeae96806ed5a28e4b8a239668c8)](https://scrutinizer-ci.com/g/mimmi20/UASparser/) 
 [![Code Coverage](https://scrutinizer-ci.com/g/mimmi20/UASparser/badges/coverage.png?s=3040011cfecbbc3d940ae0f7ed5551669a4ac21f)](https://scrutinizer-ci.com/g/mimmi20/UASparser/)
