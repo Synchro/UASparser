@@ -7,8 +7,8 @@
 [![Dependency Status](https://www.versioneye.com/php/Synchro:UASparser/dev-master/badge.png)](https://www.versioneye.com/php/Synchro:UASparser/dev-master)
 [![Depending Status](http://depending.in/Synchro/UASparser.png)](http://depending.in/Synchro/UASparser)
 
-[![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/mimmi20/UASparser/badges/quality-score.png?s=77c4592dc25aeeae96806ed5a28e4b8a239668c8)](https://scrutinizer-ci.com/g/mimmi20/UASparser/) 
-[![Code Coverage](https://scrutinizer-ci.com/g/mimmi20/UASparser/badges/coverage.png?s=3040011cfecbbc3d940ae0f7ed5551669a4ac21f)](https://scrutinizer-ci.com/g/mimmi20/UASparser/)
+[![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/Synchro/UASparser/badges/quality-score.png?s=0fb01793b5e8a32d39d659ffa122b1ea0c525b0e)](https://scrutinizer-ci.com/g/Synchro/UASparser/)
+[![Code Coverage](https://scrutinizer-ci.com/g/Synchro/UASparser/badges/coverage.png?s=57c1f76304ab8d9a53bed5188a06711db5327fdd)](https://scrutinizer-ci.com/g/Synchro/UASparser/)
 
 [![Latest Stable Version](https://poser.pugx.org/Synchro/UASparser/v/stable.png)](https://packagist.org/packages/Synchro/UASparser)
 [![Latest Unstable Version](https://poser.pugx.org/Synchro/UASparser/v/unstable.png)](https://packagist.org/packages/Synchro/UASparser)
