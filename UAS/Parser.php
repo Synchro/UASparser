@@ -47,7 +47,12 @@ class Parser
      * @type bool
      */
     protected $doDownloads = true;
-
+    /**
+     * Should this instance use zip compression while downloads
+     * Useful if use mbstring.func_overload
+     * @type bool
+     */
+    protected $useZipDownloads = true;
     /**
      * URL to fetch the full data file from.
      * @type string
@@ -460,7 +465,7 @@ class Parser
                     array(
                         'http' => array(
                             'timeout' => $timeout,
-                            'header' => "Accept-Encoding: gzip\r\n"
+                            'header' => ($this->useZipDownloads ? "Accept-Encoding: gzip\r\n" : "")
                         )
                     )
                 )
@@ -506,9 +511,15 @@ class Parser
                     CURLOPT_TIMEOUT => $timeout,
                     CURLOPT_CONNECTTIMEOUT => $timeout,
                     CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_ENCODING => 'gzip'
                 )
             );
+            if ($this->useZipDownloads) {
+                curl_setopt(
+                    $ch,
+                    CURLOPT_ENCODING,
+                    'gzip'
+                );
+            }
             $data = curl_exec($ch);
             if ($data !== false and curl_errno($ch) == 0) {
                 $this->debug(
@@ -550,6 +561,14 @@ class Parser
         $cache_dir = realpath($cache_dir);
         $this->cache_dir = $cache_dir;
         return true;
+    }
+
+    /**
+     * Set use zip compression while downloading updates.
+     * @param bool $use
+    */
+    public function setUseZipDownloads($use) {
+        $this->useZipDownloads = (bool)$use;
     }
 
     /**
