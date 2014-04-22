@@ -457,18 +457,19 @@ class Parser
         $starttime = microtime(true);
         // use fopen
         if (ini_get('allow_url_fopen')) {
+            $stream_options = array(
+                'http' => array(
+                    'timeout' => $timeout
+                )
+            );
+            if ($this->useZipDownloads) {
+                $stream_options['http']['header'] = "Accept-Encoding: gzip\r\n";
+            }
             $fp = @fopen(
                 $url,
                 'rb',
                 false,
-                stream_context_create(
-                    array(
-                        'http' => array(
-                            'timeout' => $timeout,
-                            'header' => ($this->useZipDownloads ? "Accept-Encoding: gzip\r\n" : "")
-                        )
-                    )
-                )
+                stream_context_create($stream_options)
             );
             if (is_resource($fp)) {
                 $data = stream_get_contents($fp);
