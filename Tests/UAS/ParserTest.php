@@ -1,14 +1,16 @@
 <?php
-
 /**
  * UASParser PHPUnit tests
  * @author Marcus Bointon https://github.com/Synchro
  */
-class ParserTest extends PHPUnit_Framework_TestCase
+
+namespace UAS;
+
+class ParserTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * An instance of the UAS parser to test.
-     * @type UAS\Parser
+     * @type Parser
      */
     protected static $uasparser;
     protected static $cachePath;
@@ -16,7 +18,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         self::$cachePath = sys_get_temp_dir() . '/uascache/';
-        self::$uasparser = new UAS\Parser(
+        self::$uasparser = new Parser(
             self::$cachePath,
             86400,
             true
@@ -96,9 +98,9 @@ class ParserTest extends PHPUnit_Framework_TestCase
         chmod($path, 0444); //Set read-only
         self::$uasparser->setIniUrl('https://github.com/Synchro/UASparser/raw/master/Tests/bad.ini');
         self::$uasparser->setMd5Url('https://github.com/Synchro/UASparser/raw/master/Tests/bad.md5');
-        $ok = self::$uasparser->downloadData(true);
+        $result = self::$uasparser->downloadData(true);
         chmod($path, $perms); //Reset perms
-        $this->assertFalse($ok, 'Failed file write not detected');
+        $this->assertFalse($result, 'Failed file write not detected');
         $this->resetURLs();
     }
 

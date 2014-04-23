@@ -127,7 +127,7 @@ class Parser
     public function parse($useragent = null)
     {
         // Intialize some variables
-        $browser_id = $os_id = null;
+        $browserId = $osId = null;
         $result = array();
 
         // Initialize the return value
@@ -185,24 +185,24 @@ class Parser
                     $result['ua_icon'] = $test[6];
                 }
                 if ($test[7]) { // OS set
-                    $os_data = $this->data['os'][$test[7]];
-                    if ($os_data[0]) {
-                        $result['os_family'] = $os_data[0];
+                    $osData = $this->data['os'][$test[7]];
+                    if ($osData[0]) {
+                        $result['os_family'] = $osData[0];
                     }
-                    if ($os_data[1]) {
-                        $result['os_name'] = $os_data[1];
+                    if ($osData[1]) {
+                        $result['os_name'] = $osData[1];
                     }
-                    if ($os_data[2]) {
-                        $result['os_url'] = $os_data[2];
+                    if ($osData[2]) {
+                        $result['os_url'] = $osData[2];
                     }
-                    if ($os_data[3]) {
-                        $result['os_company'] = $os_data[3];
+                    if ($osData[3]) {
+                        $result['os_company'] = $osData[3];
                     }
-                    if ($os_data[4]) {
-                        $result['os_company_url'] = $os_data[4];
+                    if ($osData[4]) {
+                        $result['os_company_url'] = $osData[4];
                     }
-                    if ($os_data[5]) {
-                        $result['os_icon'] = $os_data[5];
+                    if ($osData[5]) {
+                        $result['os_icon'] = $osData[5];
                     }
                 }
                 if ($test[8]) {
@@ -215,64 +215,64 @@ class Parser
         // Find a browser based on the regex
         foreach ($this->data['browser_reg'] as $test) {
             if (@preg_match($test[0], $useragent, $info)) { // $info may contain version
-                $browser_id = $test[1];
+                $browserId = $test[1];
                 break;
             }
         }
 
         // A valid browser was found
-        if ($browser_id) { // Browser detail
-            $browser_data = $this->data['browser'][$browser_id];
-            if ($this->data['browser_type'][$browser_data[0]][0]) {
-                $result['typ'] = $this->data['browser_type'][$browser_data[0]][0];
+        if ($browserId) { // Browser detail
+            $browserData = $this->data['browser'][$browserId];
+            if ($this->data['browser_type'][$browserData[0]][0]) {
+                $result['typ'] = $this->data['browser_type'][$browserData[0]][0];
             }
             if (isset($info[1])) {
                 $result['ua_version'] = $info[1];
             }
-            if ($browser_data[1]) {
-                $result['ua_family'] = $browser_data[1];
+            if ($browserData[1]) {
+                $result['ua_family'] = $browserData[1];
             }
-            if ($browser_data[1]) {
-                $result['ua_name'] = $browser_data[1] . (isset($info[1]) ? ' ' . $info[1] : '');
+            if ($browserData[1]) {
+                $result['ua_name'] = $browserData[1] . (isset($info[1]) ? ' ' . $info[1] : '');
             }
-            if ($browser_data[2]) {
-                $result['ua_url'] = $browser_data[2];
+            if ($browserData[2]) {
+                $result['ua_url'] = $browserData[2];
             }
-            if ($browser_data[3]) {
-                $result['ua_company'] = $browser_data[3];
+            if ($browserData[3]) {
+                $result['ua_company'] = $browserData[3];
             }
-            if ($browser_data[4]) {
-                $result['ua_company_url'] = $browser_data[4];
+            if ($browserData[4]) {
+                $result['ua_company_url'] = $browserData[4];
             }
-            if ($browser_data[5]) {
-                $result['ua_icon'] = $browser_data[5];
+            if ($browserData[5]) {
+                $result['ua_icon'] = $browserData[5];
             }
-            if ($browser_data[6]) {
-                $result['ua_info_url'] = self::$info_url . $browser_data[6];
+            if ($browserData[6]) {
+                $result['ua_info_url'] = self::$info_url . $browserData[6];
             }
         }
 
         // Browser OS, does this browser match contain a reference to an os?
-        if (isset($this->data['browser_os'][$browser_id])) { // OS detail
-            $os_id = $this->data['browser_os'][$browser_id][0]; // Get the OS id
-            $os_data = $this->data['os'][$os_id];
-            if ($os_data[0]) {
-                $result['os_family'] = $os_data[0];
+        if (isset($this->data['browser_os'][$browserId])) { // OS detail
+            $osId = $this->data['browser_os'][$browserId][0]; // Get the OS id
+            $osData = $this->data['os'][$osId];
+            if ($osData[0]) {
+                $result['os_family'] = $osData[0];
             }
-            if ($os_data[1]) {
-                $result['os_name'] = $os_data[1];
+            if ($osData[1]) {
+                $result['os_name'] = $osData[1];
             }
-            if ($os_data[2]) {
-                $result['os_url'] = $os_data[2];
+            if ($osData[2]) {
+                $result['os_url'] = $osData[2];
             }
-            if ($os_data[3]) {
-                $result['os_company'] = $os_data[3];
+            if ($osData[3]) {
+                $result['os_company'] = $osData[3];
             }
-            if ($os_data[4]) {
-                $result['os_company_url'] = $os_data[4];
+            if ($osData[4]) {
+                $result['os_company_url'] = $osData[4];
             }
-            if ($os_data[5]) {
-                $result['os_icon'] = $os_data[5];
+            if ($osData[5]) {
+                $result['os_icon'] = $osData[5];
             }
             return $result;
         }
@@ -280,31 +280,31 @@ class Parser
         // Search for the OS
         foreach ($this->data['os_reg'] as $test) {
             if (@preg_match($test[0], $useragent)) {
-                $os_id = $test[1];
+                $osId = $test[1];
                 break;
             }
         }
 
         // A valid OS was found
-        if ($os_id) { // OS detail
-            $os_data = $this->data['os'][$os_id];
-            if ($os_data[0]) {
-                $result['os_family'] = $os_data[0];
+        if ($osId) { // OS detail
+            $osData = $this->data['os'][$osId];
+            if ($osData[0]) {
+                $result['os_family'] = $osData[0];
             }
-            if ($os_data[1]) {
-                $result['os_name'] = $os_data[1];
+            if ($osData[1]) {
+                $result['os_name'] = $osData[1];
             }
-            if ($os_data[2]) {
-                $result['os_url'] = $os_data[2];
+            if ($osData[2]) {
+                $result['os_url'] = $osData[2];
             }
-            if ($os_data[3]) {
-                $result['os_company'] = $os_data[3];
+            if ($osData[3]) {
+                $result['os_company'] = $osData[3];
             }
-            if ($os_data[4]) {
-                $result['os_company_url'] = $os_data[4];
+            if ($osData[4]) {
+                $result['os_company_url'] = $osData[4];
             }
-            if ($os_data[5]) {
-                $result['os_icon'] = $os_data[5];
+            if ($osData[5]) {
+                $result['os_icon'] = $osData[5];
             }
         }
         return $result;
@@ -363,7 +363,8 @@ class Parser
         if (!ini_get('allow_url_fopen') && !function_exists('curl_init')) {
             $this->debug('Fopen wrappers and curl unavailable, cannot continue');
             trigger_error(
-                'ERROR: function file_get_contents not allowed URL open. Update the datafile (uasdata.ini in Cache Dir) manually.'
+                'ERROR: function file_get_contents not allowed URL open. Update the datafile ',
+                '(uasdata.ini in Cache Dir) manually.'
             );
             return $status;
         }
@@ -512,9 +513,9 @@ class Parser
             }
         } elseif (function_exists('curl_init')) {
             // Fall back to curl
-            $ch = curl_init($url);
+            $curl = curl_init($url);
             curl_setopt_array(
-                $ch,
+                $curl,
                 array(
                     CURLOPT_TIMEOUT => $timeout,
                     CURLOPT_CONNECTTIMEOUT => $timeout,
@@ -523,22 +524,22 @@ class Parser
             );
             if ($this->useZipDownloads) {
                 curl_setopt(
-                    $ch,
+                    $curl,
                     CURLOPT_ENCODING,
                     'gzip'
                 );
             }
-            $data = curl_exec($ch);
-            if ($data !== false and curl_errno($ch) == 0) {
+            $data = curl_exec($curl);
+            if ($data !== false and curl_errno($curl) == 0) {
                 $this->debug(
                     'Fetching URL with curl succeeded: ' . $url . '. ' .
                     strlen($data) . ' bytes in ' . (microtime(true) - $starttime) . ' sec.'
                 );
             } else {
-                $this->debug('Opening URL with curl failed: ' . $url . ' ' . curl_error($ch));
+                $this->debug('Opening URL with curl failed: ' . $url . ' ' . curl_error($curl));
                 $data = '';
             }
-            curl_close($ch);
+            curl_close($curl);
         } else {
             trigger_error('Could not fetch UAS data; neither fopen nor curl are available.', E_USER_ERROR);
         }
