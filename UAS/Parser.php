@@ -376,9 +376,11 @@ class Parser
         // Check the version on the server
         // If we are current, don't download again
         $ver = $this->getContents(self::$ver_url, $this->timeout);
-        if (preg_match('/^[0-9]{8}-[0-9]{2}$/', $ver)) { //Should be a date and version string like '20130529-01'
+        //Should be a date and version string like '20130529-01'
+        if (preg_match('/^[0-9]{8}-[0-9]{2}$/', $ver)) {
             if (array_key_exists('localversion', $cacheIni)) {
-                if ($ver <= $cacheIni['localversion']) { //Version on server is same as or older than what we already have
+                //Version on server is same as or older than what we already have
+                if ($ver <= $cacheIni['localversion']) {
                     if ($force) {
                         $this->debug('Existing file is current, but forcing a download anyway.');
                     } else {
@@ -457,31 +459,30 @@ class Parser
         $starttime = microtime(true);
         // use fopen
         if (ini_get('allow_url_fopen')) {
-            $stream_options = array(
+            $streamOptions = array(
                 'http' => array(
                     'timeout' => $timeout
                 )
             );
             if ($this->useZipDownloads) {
-                $stream_options['http']['header'] = "Accept-Encoding: gzip\r\n";
+                $streamOptions['http']['header'] = "Accept-Encoding: gzip\r\n";
             }
-            $fp = @fopen(
+            $filep = @fopen(
                 $url,
                 'rb',
                 false,
-                stream_context_create($stream_options)
+                stream_context_create($streamOptions)
             );
-            if (is_resource($fp)) {
-                $data = stream_get_contents($fp);
-                $res = stream_get_meta_data($fp);
+            if (is_resource($filep)) {
+                $data = stream_get_contents($filep);
+                $res = stream_get_meta_data($filep);
                 $headers = array();
-                if (array_key_exists('wrapper_data', $res) && array_key_exists('headers', $res['wrapper_data']) ) {
+                if (array_key_exists('wrapper_data', $res) && array_key_exists('headers', $res['wrapper_data'])) {
                     $headers = $res['wrapper_data']['headers'];
-                }
-                elseif (array_key_exists('wrapper_data', $res) ) {
+                } elseif (array_key_exists('wrapper_data', $res)) {
                     $headers = $res['wrapper_data'];
                 }
-                if( !empty($headers) ) {
+                if (!empty($headers)) {
                     foreach ($headers as $d) {
                         if ($d == 'Content-Encoding: gzip') { //Data was compressed
                             $data = gzinflate(substr($data, 10, -8)); //Uncompress data
@@ -490,7 +491,7 @@ class Parser
                         }
                     }
                 }
-                fclose($fp);
+                fclose($filep);
                 if (empty($data)) {
                     if ($this->debug) {
                         if ($res['timed_out']) {
@@ -502,9 +503,8 @@ class Parser
                     $data = '';
                 } else {
                     $this->debug(
-                        'Fetching URL with fopen succeeded: ' . $url . '. ' . strlen($data) . ' bytes in ' . (microtime(
-                                true
-                            ) - $starttime) . ' sec.'
+                        'Fetching URL with fopen succeeded: ' . $url . '. ' .
+                        strlen($data) . ' bytes in ' . (microtime(true) - $starttime) . ' sec.'
                     );
                 }
             } else {
@@ -531,9 +531,8 @@ class Parser
             $data = curl_exec($ch);
             if ($data !== false and curl_errno($ch) == 0) {
                 $this->debug(
-                    'Fetching URL with curl succeeded: ' . $url . '. ' . strlen($data) . ' bytes in ' . (microtime(
-                            true
-                        ) - $starttime) . ' sec.'
+                    'Fetching URL with curl succeeded: ' . $url . '. ' .
+                    strlen($data) . ' bytes in ' . (microtime(true) - $starttime) . ' sec.'
                 );
             } else {
                 $this->debug('Opening URL with curl failed: ' . $url . ' ' . curl_error($ch));
@@ -551,31 +550,32 @@ class Parser
      * @param string
      * @return bool
      */
-    public function setCacheDir($cache_dir)
+    public function setCacheDir($cacheDir)
     {
-        $this->debug('Setting cache dir to ' . $cache_dir);
+        $this->debug('Setting cache dir to ' . $cacheDir);
         // The directory does not exist at this moment, try to make it
-        if (!file_exists($cache_dir)) {
-            @mkdir($cache_dir, 0777, true);
+        if (!file_exists($cacheDir)) {
+            @mkdir($cacheDir, 0777, true);
         }
 
         // perform some extra checks
-        if (!is_writable($cache_dir) || !is_dir($cache_dir)) {
-            $this->debug('Cache dir(' . $cache_dir . ') is not a directory or not writable');
+        if (!is_writable($cacheDir) || !is_dir($cacheDir)) {
+            $this->debug('Cache dir(' . $cacheDir . ') is not a directory or not writable');
             return false;
         }
 
         // store the cache dir
-        $cache_dir = realpath($cache_dir);
-        $this->cache_dir = $cache_dir;
+        $cacheDir = realpath($cacheDir);
+        $this->cache_dir = $cacheDir;
         return true;
     }
 
     /**
      * Set use zip compression while downloading updates.
      * @param bool $use
-    */
-    public function setUseZipDownloads($use) {
+     */
+    public function setUseZipDownloads($use)
+    {
         $this->useZipDownloads = (bool)$use;
     }
 
@@ -620,7 +620,8 @@ class Parser
      * Set whether downloads are allowed.
      * @param $doDownloads
      */
-    public function setDoDownloads($doDownloads) {
+    public function setDoDownloads($doDownloads)
+    {
         $this->doDownloads = (boolean)$doDownloads;
     }
 
