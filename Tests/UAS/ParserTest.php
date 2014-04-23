@@ -23,8 +23,8 @@ class ParserTest extends PHPUnit_Framework_TestCase
     }
 
     public static function tearDownAfterClass() {
-        //self::$uasparser->clearCache();
-        //@unlink(self::$cache_path);
+        self::$uasparser->clearCache();
+        @unlink(self::$cache_path);
     }
 
     public function resetURLs() {
