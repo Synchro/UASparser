@@ -468,8 +468,15 @@ class Parser
             if (is_resource($fp)) {
                 $data = stream_get_contents($fp);
                 $res = stream_get_meta_data($fp);
-                if (array_key_exists('wrapper_data', $res)) {
-                    foreach ($res['wrapper_data'] as $d) {
+                $headers = array();
+                if (array_key_exists('wrapper_data', $res) && array_key_exists('headers', $res['wrapper_data']) ) {
+                    $headers = $res['wrapper_data']['headers'];
+				}
+                elseif (array_key_exists('wrapper_data', $res) ) {
+                    $headers = $res['wrapper_data'];
+				}
+                if( !empty($headers) ) {
+                    foreach ($headers as $d) {
                         if ($d == 'Content-Encoding: gzip') { //Data was compressed
                             $data = gzinflate(substr($data, 10, -8)); //Uncompress data
                             $this->debug('Successfully uncompressed data');
