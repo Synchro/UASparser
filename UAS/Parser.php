@@ -477,10 +477,10 @@ class Parser
                 $headers = array();
                 if (array_key_exists('wrapper_data', $res) && array_key_exists('headers', $res['wrapper_data']) ) {
                     $headers = $res['wrapper_data']['headers'];
-				}
+                }
                 elseif (array_key_exists('wrapper_data', $res) ) {
                     $headers = $res['wrapper_data'];
-				}
+                }
                 if( !empty($headers) ) {
                     foreach ($headers as $d) {
                         if ($d == 'Content-Encoding: gzip') { //Data was compressed
@@ -622,5 +622,65 @@ class Parser
      */
     public function setDoDownloads($doDownloads) {
         $this->doDownloads = (boolean)$doDownloads;
+    }
+
+    /**
+     * Get the download URL for the ini file
+     * @return string
+     */
+    public function getIniUrl()
+    {
+        return self::$ini_url;
+    }
+
+    /**
+     * Set the download URL for the ini file
+     * @param string $url
+     */
+    public function setIniUrl($url)
+    {
+        if (filter_var($url, FILTER_VALIDATE_URL)) {
+            self::$ini_url = $url;
+        }
+    }
+
+    /**
+     * Get the download URL for the version file
+     * @return string
+     */
+    public function getVerUrl()
+    {
+        return self::$ver_url;
+    }
+
+    /**
+     * Set the download URL for the version file
+     * @param string $url
+     */
+    public function setVerUrl($url)
+    {
+        if (filter_var($url, FILTER_VALIDATE_URL)) {
+            self::$ver_url = $url;
+        }
+    }
+
+    /**
+     * Get the download URL for the checksum file
+     * @return string
+     */
+    public function getMd5Url()
+    {
+        return self::$md5_url;
+    }
+
+    /**
+     * Set the download URL for the checksum file
+     * @param string $url
+     */
+    public function setMd5Url($url)
+    {
+        if (filter_var($url, FILTER_VALIDATE_URL)) {
+            self::$md5_url = $url;
+        }
     }
 }
