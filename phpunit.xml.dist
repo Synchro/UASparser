@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<phpunit bootstrap="./bootstrap.php"
+<phpunit bootstrap="Tests/bootstrap.php"
          verbose="false"
          stopOnError="false"
          stopOnFailure="false"
@@ -14,7 +14,7 @@
          processIsolation="false">
     <testsuites>
         <testsuite name="UASParser tests">
-            <directory>./UAS/</directory>
+            <directory>Tests/UAS/</directory>
         </testsuite>
     </testsuites>
     <filter>
