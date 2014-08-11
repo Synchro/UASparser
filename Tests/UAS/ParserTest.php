@@ -186,7 +186,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         );
         $this->assertEquals($uas['os_family'], 'OS X');
         $this->assertEquals($uas['os_name'], 'OS X 10.8 Mountain Lion');
-        $this->assertEquals($uas['os_url'], 'http://www.apple.com/osx/');
+        $this->assertEquals($uas['os_url'], 'http://en.wikipedia.org/wiki/OS_X_Mountain_Lion');
         $this->assertEquals($uas['os_company'], 'Apple Computer, Inc.');
         $this->assertEquals($uas['os_company_url'], 'http://www.apple.com/');
         $this->assertEquals($uas['os_icon'], 'macosx.png');
@@ -216,7 +216,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         );
         $this->assertEquals($uas['os_family'], 'OS X');
         $this->assertEquals($uas['os_name'], 'OS X 10.8 Mountain Lion');
-        $this->assertEquals($uas['os_url'], 'http://www.apple.com/osx/');
+        $this->assertEquals($uas['os_url'], 'http://en.wikipedia.org/wiki/OS_X_Mountain_Lion');
         $this->assertEquals($uas['os_company'], 'Apple Computer, Inc.');
         $this->assertEquals($uas['os_company_url'], 'http://www.apple.com/');
         $this->assertEquals($uas['os_icon'], 'macosx.png');
