@@ -67,6 +67,9 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
     public function testUpdateDatabase()
     {
+        $this->markTestIncomplete(
+            'The free UAS database download is no longer available.'
+        );
         $this->assertTrue(self::$uasparser->downloadData()); //Should cause a download
         $this->assertTrue(self::$uasparser->downloadData(true)); //Should also cause a download
         $this->assertTrue(self::$uasparser->downloadData()); //Should NOT cause a download
@@ -91,6 +94,9 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $this->resetURLs();
     }
 
+    /**
+     * @depends testUpdateDatabase
+     */
     public function testPermissions()
     {
         $path = self::$uasparser->getCacheDir() . DIRECTORY_SEPARATOR . 'uasdata.ini';
