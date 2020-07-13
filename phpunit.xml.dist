@@ -1,25 +1,17 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<phpunit bootstrap="Tests/bootstrap.php"
-         verbose="false"
-         stopOnError="false"
-         stopOnFailure="false"
-         stopOnIncomplete="false"
-         stopOnSkipped="false"
+<phpunit backupGlobals="false"
+         backupStaticAttributes="false"
+         bootstrap="vendor/autoload.php"
+         colors="true"
          convertErrorsToExceptions="true"
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
-         colors="false"
-         forceCoversAnnotation="false"
-         strict="false"
-         processIsolation="false">
+         processIsolation="false"
+         stopOnFailure="false"
+>
     <testsuites>
-        <testsuite name="UASParser tests">
-            <directory>Tests/UAS/</directory>
+        <testsuite name="UAS Parser Tests">
+            <directory>./Tests/UAS/</directory>
         </testsuite>
     </testsuites>
-    <filter>
-        <whitelist>
-            <directory suffix=".php">UAS/</directory>
-        </whitelist>
-    </filter>
 </phpunit>

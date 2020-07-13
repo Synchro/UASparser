@@ -1,36 +1,39 @@
 {
-    "name": "synchro/uasparser",
-    "type": "library",
-    "license": "LGPL-2.1",
-    "description": "UASparser is a PHP parser and classifier for user agent strings presented by HTTP clients using databases from http://user-agent-string.info/.",
-    "keywords": ["http", "parser", "user-agent"],
-    "homepage": "https://github.com/Synchro/UASparser",
-    "authors": [
-        {
-            "name": "Jaroslav Mallat",
-            "homepage": "http://user-agent-string.info/",
-            "role": "developer"
-        },
-        {
-            "name": "Marcus Bointon",
-            "email": "marcus@synchromedia.co.uk",
-            "homepage": "https://github.com/Synchro",
-            "role": "developer"
-        }
-    ],
-    "require": {
-        "php": ">=5.3.0"
+  "name": "synchro/uasparser",
+  "type": "library",
+  "license": "LGPL-2.1",
+  "description": "UASparser is a PHP parser and classifier for user agent strings presented by HTTP clients using databases from http://user-agent-string.info/.",
+  "keywords": [
+    "http",
+    "parser",
+    "user-agent"
+  ],
+  "homepage": "https://github.com/Synchro/UASparser",
+  "authors": [
+    {
+      "name": "Jaroslav Mallat",
+      "homepage": "http://user-agent-string.info/",
+      "role": "developer"
     },
-    "require-dev": {
-        "phpunit/phpunit": "~4.0",
-        "phpunit/phpcov": "dev-master",
-        "phpunit/phpunit-story": "~1.0",
-        "mikey179/vfsStream": "~1.5",
-        "satooshi/php-coveralls": "dev-master"
-    },
-    "autoload": {
-        "psr-0": {
-            "UAS": ""
-        }
+    {
+      "name": "Marcus Bointon",
+      "email": "marcus@synchromedia.co.uk",
+      "homepage": "https://github.com/Synchro",
+      "role": "developer"
     }
+  ],
+  "require": {
+    "php": ">=7.3.0"
+  },
+  "require-dev": {
+    "squizlabs/php_codesniffer": "^3.5.5",
+    "phpcompatibility/php-compatibility": "^9.3.5",
+    "phpunit/phpunit": "~9.2.5",
+    "mikey179/vfsstream": "~1.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "UAS\\": "UAS/"
+    }
+  }
 }

@@ -12,7 +12,7 @@
 namespace UAS;
 
 // Loads the class
-require 'UAS/Parser.php';
+require 'vendor/autoload.php';
 
 // header page
 scriptheader();
@@ -156,7 +156,7 @@ foot();
 function scriptheader()
 {
     ?>
-<html>
+<html lang="en">
 <head>
     <title>class UASparser.php example</title>
 </head>

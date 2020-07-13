@@ -1,4 +1,5 @@
 <?php
+
 /**
  * User Agent String Parser
  *
@@ -104,8 +105,8 @@ class Parser
         if ($updateInterval) {
             $this->updateInterval = $updateInterval;
         }
-        $this->debug = (boolean)$debug;
-        $this->doDownloads = (boolean)$doDownloads;
+        $this->debug = (bool) $debug;
+        $this->doDownloads = (bool) $doDownloads;
     }
 
     /**
@@ -577,7 +578,7 @@ class Parser
      */
     public function setUseZipDownloads($use)
     {
-        $this->useZipDownloads = (bool)$use;
+        $this->useZipDownloads = (bool) $use;
     }
 
     /**
@@ -623,7 +624,7 @@ class Parser
      */
     public function setDoDownloads($doDownloads)
     {
-        $this->doDownloads = (boolean)$doDownloads;
+        $this->doDownloads = (bool) $doDownloads;
     }
 
     /**

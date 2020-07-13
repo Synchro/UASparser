@@ -1,5 +1,6 @@
-.idea/
 phpdoc/
-vendor
+vendor/
 build/
 composer.phar
+composer.lock
+.phpcs-cache

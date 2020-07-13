@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd">
+
+    <config name="testVersion" value="7.3-"/>
+
+    <arg name="basepath" value="."/>
+    <arg name="cache" value=".phpcs-cache"/>
+    <arg name="colors"/>
+    <arg name="extensions" value="php"/>
+    <arg name="parallel" value="10"/>
+    <!-- Show progress -->
+    <arg value="p"/>
+
+    <file>UAS</file>
+    <file>Tests</file>
+    <file>UASparser_example.phps</file>
+
+    <rule ref="PSR12"/>
+    <rule ref="PHPCompatibility"/>
+    <rule ref="Generic.Formatting.SpaceAfterCast"/>
+</ruleset>

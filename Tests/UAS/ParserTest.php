@@ -1,4 +1,5 @@
 <?php
+
 /**
  * UASParser PHPUnit tests
  * @author Marcus Bointon https://github.com/Synchro
@@ -6,7 +7,9 @@
 
 namespace UAS;
 
-class ParserTest extends \PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+class ParserTest extends TestCase
 {
     /**
      * An instance of the UAS parser to test.
@@ -15,7 +18,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     protected static $uasparser;
     protected static $cachePath;
 
-    public function setUp()
+    public function setUp(): void
     {
         self::$cachePath = sys_get_temp_dir() . '/uascache/';
         self::$uasparser = new Parser(
@@ -26,13 +29,13 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         self::$uasparser->timeout = 600; //Be pessimistic, site can be very slow
     }
 
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
         self::$uasparser->clearCache();
         @unlink(self::$cachePath);
     }
 
-    public function resetURLs()
+    public function resetURLs(): void
     {
         self::$uasparser->setIniUrl('http://user-agent-string.info/rpc/get_data.php?key=free&format=ini');
         self::$uasparser->setVerUrl('http://user-agent-string.info/rpc/get_data.php?key=free&format=ini&ver=y');
@@ -42,62 +45,62 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     /**
      * Check setting the download dir to various values.
      */
-    public function testSetPath()
+    public function testSetPath(): void
     {
-        $this->assertTrue(self::$uasparser->setCacheDir(self::$cachePath));
+        self::assertTrue(self::$uasparser->setCacheDir(self::$cachePath));
         //Test non-writable path
-        $this->assertFalse(self::$uasparser->setCacheDir('/var'));
+        self::assertFalse(self::$uasparser->setCacheDir('/var'));
         //Test non-existent path
-        $this->assertFalse(self::$uasparser->setCacheDir('/jksdhfkjhsldkfhklkh/' . md5(microtime(true))));
+        self::assertFalse(self::$uasparser->setCacheDir('/jksdhfkjhsldkfhklkh/' . md5(microtime(true))));
     }
 
     /**
      * Check that the download dir is the same as we set it to
      */
-    public function testPath()
+    public function testPath(): void
     {
-        $this->assertEquals(self::$uasparser->getCacheDir(), realpath(self::$cachePath));
+        self::assertEquals(self::$uasparser->getCacheDir(), realpath(self::$cachePath));
     }
 
-    public function testExpires()
+    public function testExpires(): void
     {
         self::$uasparser->updateInterval = 99999;
-        $this->assertEquals(self::$uasparser->updateInterval, 99999);
+        self::assertEquals(99999, self::$uasparser->updateInterval);
     }
 
-    public function testUpdateDatabase()
+    public function testUpdateDatabase(): void
     {
-        $this->markTestIncomplete(
+        self::markTestIncomplete(
             'The free UAS database download is no longer available.'
         );
-        $this->assertTrue(self::$uasparser->downloadData()); //Should cause a download
-        $this->assertTrue(self::$uasparser->downloadData(true)); //Should also cause a download
-        $this->assertTrue(self::$uasparser->downloadData()); //Should NOT cause a download
+        self::assertTrue(self::$uasparser->downloadData()); //Should cause a download
+        self::assertTrue(self::$uasparser->downloadData(true)); //Should also cause a download
+        self::assertTrue(self::$uasparser->downloadData()); //Should NOT cause a download
     }
 
-    public function testDownloadErrors()
+    public function testDownloadErrors(): void
     {
         self::$uasparser->setIniUrl('https://github.com/Synchro/UASparser/raw/master/Tests/empty.ini');
-        $this->assertFalse(self::$uasparser->downloadData(true), 'Empty file considered good');
+        self::assertFalse(self::$uasparser->downloadData(true), 'Empty file considered good');
         self::$uasparser->setIniUrl('https://github.com/Synchro/UASparser/raw/master/Tests/bad.ini');
         self::$uasparser->setVerUrl('https://github.com/Synchro/UASparser/raw/master/Tests/bad.ver');
-        $this->assertFalse(self::$uasparser->downloadData(true), 'Bad file considered good');
+        self::assertFalse(self::$uasparser->downloadData(true), 'Bad file considered good');
         $this->resetURLs();
     }
 
-    public function testChecksums()
+    public function testChecksums(): void
     {
         self::$uasparser->setMd5Url('https://github.com/Synchro/UASparser/raw/master/Tests/empty.ini');
-        $this->assertFalse(self::$uasparser->downloadData(true), 'Empty checksum considered good');
+        self::assertFalse(self::$uasparser->downloadData(true), 'Empty checksum considered good');
         self::$uasparser->setMd5Url('https://github.com/Synchro/UASparser/raw/master/Tests/bad.ini');
-        $this->assertFalse(self::$uasparser->downloadData(true), 'Bad checksum considered good');
+        self::assertFalse(self::$uasparser->downloadData(true), 'Bad checksum considered good');
         $this->resetURLs();
     }
 
     /**
      * @depends testUpdateDatabase
      */
-    public function testPermissions()
+    public function testPermissions(): void
     {
         $path = self::$uasparser->getCacheDir() . DIRECTORY_SEPARATOR . 'uasdata.ini';
         $perms = fileperms($path);
@@ -106,17 +109,17 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         self::$uasparser->setMd5Url('https://github.com/Synchro/UASparser/raw/master/Tests/bad.md5');
         $result = self::$uasparser->downloadData(true);
         chmod($path, $perms); //Reset perms
-        $this->assertFalse($result, 'Failed file write not detected');
+        self::assertFalse($result, 'Failed file write not detected');
         $this->resetURLs();
     }
 
     /**
      * Test control over downloads.
      */
-    public function testDownloadControl()
+    public function testDownloadControl(): void
     {
         self::$uasparser->setDoDownloads(false);
-        $this->assertFalse(self::$uasparser->getDoDownloads());
+        self::assertFalse(self::$uasparser->getDoDownloads());
         self::$uasparser->setUseZipDownloads(true);
         //Inject an old timestamp into the cache file
         $cache = file_get_contents(self::$uasparser->getCacheDir() . '/cache.ini');
@@ -135,149 +138,149 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     /**
      * Misc calls for coverage.
      */
-    public function testCoverage()
+    public function testCoverage(): void
     {
-        self::$uasparser->getIniUrl();
-        self::$uasparser->getVerUrl();
-        self::$uasparser->getMd5Url();
+        self::assertNotEmpty(self::$uasparser->getIniUrl());
+        self::assertNotEmpty(self::$uasparser->getVerUrl());
+        self::assertNotEmpty(self::$uasparser->getMd5Url());
     }
 
     /**
      * Test getting the current user agent.
      * @depends testUpdateDatabase
      */
-    public function testCurrent()
+    public function testCurrent(): void
     {
         $uas = self::$uasparser->parse();
-        $this->assertTrue(is_array($uas));
-        $this->assertArrayHasKey('typ', $uas);
-        $this->assertArrayHasKey('ua_family', $uas);
-        $this->assertArrayHasKey('ua_name', $uas);
-        $this->assertArrayHasKey('ua_version', $uas);
-        $this->assertArrayHasKey('ua_url', $uas);
-        $this->assertArrayHasKey('ua_company', $uas);
-        $this->assertArrayHasKey('ua_company_url', $uas);
-        $this->assertArrayHasKey('ua_icon', $uas);
-        $this->assertArrayHasKey('ua_info_url', $uas);
-        $this->assertArrayHasKey('os_family', $uas);
-        $this->assertArrayHasKey('os_name', $uas);
-        $this->assertArrayHasKey('os_url', $uas);
-        $this->assertArrayHasKey('os_company', $uas);
-        $this->assertArrayHasKey('os_company_url', $uas);
-        $this->assertArrayHasKey('os_icon', $uas);
+        self::assertIsArray($uas);
+        self::assertArrayHasKey('typ', $uas);
+        self::assertArrayHasKey('ua_family', $uas);
+        self::assertArrayHasKey('ua_name', $uas);
+        self::assertArrayHasKey('ua_version', $uas);
+        self::assertArrayHasKey('ua_url', $uas);
+        self::assertArrayHasKey('ua_company', $uas);
+        self::assertArrayHasKey('ua_company_url', $uas);
+        self::assertArrayHasKey('ua_icon', $uas);
+        self::assertArrayHasKey('ua_info_url', $uas);
+        self::assertArrayHasKey('os_family', $uas);
+        self::assertArrayHasKey('os_name', $uas);
+        self::assertArrayHasKey('os_url', $uas);
+        self::assertArrayHasKey('os_company', $uas);
+        self::assertArrayHasKey('os_company_url', $uas);
+        self::assertArrayHasKey('os_icon', $uas);
     }
 
     /**
      * Test a specific, known user agent string.
      * @depends testUpdateDatabase
      */
-    public function testSafari()
+    public function testSafari(): void
     {
         $uas = self::$uasparser->parse(
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/536.26.17 (KHTML, like Gecko) '.
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/536.26.17 (KHTML, like Gecko) ' .
             'Version/6.0.2 Safari/536.26.17'
         );
-        $this->assertTrue(is_array($uas));
-        $this->assertEquals($uas['typ'], 'Browser');
-        $this->assertEquals($uas['ua_family'], 'Safari');
-        $this->assertEquals($uas['ua_name'], 'Safari 6.0.2');
-        $this->assertEquals($uas['ua_version'], '6.0.2');
-        $this->assertEquals($uas['ua_url'], 'http://en.wikipedia.org/wiki/Safari_%28web_browser%29');
-        $this->assertEquals($uas['ua_company'], 'Apple Inc.');
-        $this->assertEquals($uas['ua_company_url'], 'http://www.apple.com/');
-        $this->assertEquals($uas['ua_icon'], 'safari.png');
-        $this->assertEquals(
-            $uas['ua_info_url'],
-            'http://user-agent-string.info/list-of-ua/browser-detail?browser=Safari'
+        self::assertIsArray($uas);
+        self::assertEquals('Browser', $uas['typ']);
+        self::assertEquals('Safari', $uas['ua_family']);
+        self::assertEquals('Safari 6.0.2', $uas['ua_name']);
+        self::assertEquals('6.0.2', $uas['ua_version']);
+        self::assertEquals('http://en.wikipedia.org/wiki/Safari_%28web_browser%29', $uas['ua_url']);
+        self::assertEquals('Apple Inc.', $uas['ua_company']);
+        self::assertEquals('http://www.apple.com/', $uas['ua_company_url']);
+        self::assertEquals('safari.png', $uas['ua_icon']);
+        self::assertEquals(
+            'http://user-agent-string.info/list-of-ua/browser-detail?browser=Safari',
+            $uas['ua_info_url']
         );
-        $this->assertEquals($uas['os_family'], 'OS X');
-        $this->assertEquals($uas['os_name'], 'OS X 10.8 Mountain Lion');
-        $this->assertEquals($uas['os_url'], 'http://en.wikipedia.org/wiki/OS_X_Mountain_Lion');
-        $this->assertEquals($uas['os_company'], 'Apple Computer, Inc.');
-        $this->assertEquals($uas['os_company_url'], 'http://www.apple.com/');
-        $this->assertEquals($uas['os_icon'], 'macosx.png');
+        self::assertEquals('OS X', $uas['os_family']);
+        self::assertEquals('OS X 10.8 Mountain Lion', $uas['os_name']);
+        self::assertEquals('http://en.wikipedia.org/wiki/OS_X_Mountain_Lion', $uas['os_url']);
+        self::assertEquals('Apple Computer, Inc.', $uas['os_company']);
+        self::assertEquals('http://www.apple.com/', $uas['os_company_url']);
+        self::assertEquals('macosx.png', $uas['os_icon']);
     }
 
     /**
      * Test getting the user agent from the global env.
      * @depends testUpdateDatabase
      */
-    public function testEnv()
+    public function testEnv(): void
     {
-        $_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/536.26.17 '.
+        $_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/536.26.17 ' .
             '(KHTML, like Gecko) Version/6.0.2 Safari/536.26.17';
         $uas = self::$uasparser->parse();
-        $this->assertTrue(is_array($uas));
-        $this->assertEquals($uas['typ'], 'Browser');
-        $this->assertEquals($uas['ua_family'], 'Safari');
-        $this->assertEquals($uas['ua_name'], 'Safari 6.0.2');
-        $this->assertEquals($uas['ua_version'], '6.0.2');
-        $this->assertEquals($uas['ua_url'], 'http://en.wikipedia.org/wiki/Safari_%28web_browser%29');
-        $this->assertEquals($uas['ua_company'], 'Apple Inc.');
-        $this->assertEquals($uas['ua_company_url'], 'http://www.apple.com/');
-        $this->assertEquals($uas['ua_icon'], 'safari.png');
-        $this->assertEquals(
-            $uas['ua_info_url'],
-            'http://user-agent-string.info/list-of-ua/browser-detail?browser=Safari'
+        self::assertIsArray($uas);
+        self::assertEquals('Browser', $uas['typ']);
+        self::assertEquals('Safari', $uas['ua_family']);
+        self::assertEquals('Safari 6.0.2', $uas['ua_name']);
+        self::assertEquals('6.0.2', $uas['ua_version']);
+        self::assertEquals('http://en.wikipedia.org/wiki/Safari_%28web_browser%29', $uas['ua_url']);
+        self::assertEquals('Apple Inc.', $uas['ua_company']);
+        self::assertEquals('http://www.apple.com/', $uas['ua_company_url']);
+        self::assertEquals('safari.png', $uas['ua_icon']);
+        self::assertEquals(
+            'http://user-agent-string.info/list-of-ua/browser-detail?browser=Safari',
+            $uas['ua_info_url']
         );
-        $this->assertEquals($uas['os_family'], 'OS X');
-        $this->assertEquals($uas['os_name'], 'OS X 10.8 Mountain Lion');
-        $this->assertEquals($uas['os_url'], 'http://en.wikipedia.org/wiki/OS_X_Mountain_Lion');
-        $this->assertEquals($uas['os_company'], 'Apple Computer, Inc.');
-        $this->assertEquals($uas['os_company_url'], 'http://www.apple.com/');
-        $this->assertEquals($uas['os_icon'], 'macosx.png');
+        self::assertEquals('OS X', $uas['os_family']);
+        self::assertEquals('OS X 10.8 Mountain Lion', $uas['os_name']);
+        self::assertEquals('http://en.wikipedia.org/wiki/OS_X_Mountain_Lion', $uas['os_url']);
+        self::assertEquals('Apple Computer, Inc.', $uas['os_company']);
+        self::assertEquals('http://www.apple.com/', $uas['os_company_url']);
+        self::assertEquals('macosx.png', $uas['os_icon']);
     }
 
     /**
      * Test a robot user agent.
      * @depends testUpdateDatabase
      */
-    public function testRobot()
+    public function testRobot(): void
     {
         $uas = self::$uasparser->parse('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)');
-        $this->assertTrue(is_array($uas));
-        $this->assertEquals($uas['typ'], 'Robot');
-        $this->assertEquals($uas['ua_family'], 'Googlebot');
-        $this->assertEquals($uas['ua_name'], 'Googlebot/2.1');
-        $this->assertEquals($uas['ua_version'], 'unknown');
-        $this->assertEquals($uas['ua_url'], 'https://support.google.com/webmasters/answer/1061943?hl=en');
-        $this->assertEquals($uas['ua_company'], 'Google Inc.');
-        $this->assertEquals($uas['ua_company_url'], 'http://www.google.com/');
-        $this->assertEquals($uas['ua_icon'], 'bot_googlebot.png');
-        $this->assertEquals($uas['ua_info_url'], 'http://user-agent-string.info/list-of-ua/bot-detail?bot=Googlebot');
-        $this->assertEquals($uas['os_family'], 'unknown');
-        $this->assertEquals($uas['os_name'], 'unknown');
-        $this->assertEquals($uas['os_url'], 'unknown');
-        $this->assertEquals($uas['os_company'], 'unknown');
-        $this->assertEquals($uas['os_company_url'], 'unknown');
-        $this->assertEquals($uas['os_icon'], 'unknown.png');
+        self::assertIsArray($uas);
+        self::assertEquals('Robot', $uas['typ']);
+        self::assertEquals('Googlebot', $uas['ua_family']);
+        self::assertEquals('Googlebot/2.1', $uas['ua_name']);
+        self::assertEquals('unknown', $uas['ua_version']);
+        self::assertEquals('https://support.google.com/webmasters/answer/1061943?hl=en', $uas['ua_url']);
+        self::assertEquals('Google Inc.', $uas['ua_company']);
+        self::assertEquals('http://www.google.com/', $uas['ua_company_url']);
+        self::assertEquals('bot_googlebot.png', $uas['ua_icon']);
+        self::assertEquals('http://user-agent-string.info/list-of-ua/bot-detail?bot=Googlebot', $uas['ua_info_url']);
+        self::assertEquals('unknown', $uas['os_family']);
+        self::assertEquals('unknown', $uas['os_name']);
+        self::assertEquals('unknown', $uas['os_url']);
+        self::assertEquals('unknown', $uas['os_company']);
+        self::assertEquals('unknown', $uas['os_company_url']);
+        self::assertEquals('unknown.png', $uas['os_icon']);
     }
 
     /**
      * Test an user agent whose OS needs to be looked up.
      * @depends testUpdateDatabase
      */
-    public function testUnknownOS()
+    public function testUnknownOS(): void
     {
         $uas = self::$uasparser->parse('OmniWeb/2.7-beta-3 OWF/1.0');
-        $this->assertTrue(is_array($uas));
-        $this->assertEquals($uas['typ'], 'Browser');
-        $this->assertEquals($uas['ua_family'], 'OmniWeb');
-        $this->assertEquals($uas['ua_name'], 'OmniWeb 2.7-beta-3');
-        $this->assertEquals($uas['ua_version'], '2.7-beta-3');
-        $this->assertEquals($uas['ua_url'], 'http://www.omnigroup.com/applications/omniweb/');
-        $this->assertEquals($uas['ua_company'], 'Omni Development, Inc.');
-        $this->assertEquals($uas['ua_company_url'], 'http://www.omnigroup.com/');
-        $this->assertEquals($uas['ua_icon'], 'omniweb.png');
-        $this->assertEquals(
-            $uas['ua_info_url'],
-            'http://user-agent-string.info/list-of-ua/browser-detail?browser=OmniWeb'
+        self::assertIsArray($uas);
+        self::assertEquals('Browser', $uas['typ']);
+        self::assertEquals('OmniWeb', $uas['ua_family']);
+        self::assertEquals('OmniWeb 2.7-beta-3', $uas['ua_name']);
+        self::assertEquals('2.7-beta-3', $uas['ua_version']);
+        self::assertEquals('http://www.omnigroup.com/applications/omniweb/', $uas['ua_url']);
+        self::assertEquals('Omni Development, Inc.', $uas['ua_company']);
+        self::assertEquals('http://www.omnigroup.com/', $uas['ua_company_url']);
+        self::assertEquals('omniweb.png', $uas['ua_icon']);
+        self::assertEquals(
+            'http://user-agent-string.info/list-of-ua/browser-detail?browser=OmniWeb',
+            $uas['ua_info_url']
         );
-        $this->assertEquals($uas['os_family'], 'Mac OS');
-        $this->assertEquals($uas['os_name'], 'Mac OS');
-        $this->assertEquals($uas['os_url'], 'http://en.wikipedia.org/wiki/Mac_OS');
-        $this->assertEquals($uas['os_company'], 'Apple Computer, Inc.');
-        $this->assertEquals($uas['os_company_url'], 'http://www.apple.com/');
-        $this->assertEquals($uas['os_icon'], 'macos.png');
+        self::assertEquals('Mac OS', $uas['os_family']);
+        self::assertEquals('Mac OS', $uas['os_name']);
+        self::assertEquals('http://en.wikipedia.org/wiki/Mac_OS', $uas['os_url']);
+        self::assertEquals('Apple Computer, Inc.', $uas['os_company']);
+        self::assertEquals('http://www.apple.com/', $uas['os_company_url']);
+        self::assertEquals('macos.png', $uas['os_icon']);
     }
 }
