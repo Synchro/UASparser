@@ -1,11 +1,10 @@
 # UASparser — A User Agent String parser for PHP
 
-** Important: while the code in this package is functional, it's no longer any use because the data source at user-agent-string.info (now udger.com) it relied on is no longer available.**
+**Important: while the code in this package is functional, it's no longer any use because the data source at user-agent-string.info (now udger.com) it relied on is no longer available.**
 
 It may work with udger.com's commercial data sources, but that's not available to test with; I recommend you switch to a different system such as [Mobile-Detect](https://github.com/serbanghita/Mobile-Detect).
 
 [![Build Status](https://travis-ci.org/Synchro/UASparser.png?branch=master)](https://travis-ci.org/Synchro/UASparser)
-
 [![Latest Stable Version](https://poser.pugx.org/Synchro/UASparser/v/stable.png)](https://packagist.org/packages/Synchro/UASparser)
 [![Latest Unstable Version](https://poser.pugx.org/Synchro/UASparser/v/unstable.png)](https://packagist.org/packages/Synchro/UASparser)
 
